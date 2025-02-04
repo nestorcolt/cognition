@@ -1,17 +1,4 @@
-active_provider: "mem0"
+active_provider: "default"
 providers:
-  - name: mem0
-    enabled: true
-    config:
-      storage_path: "./data/mem0"
-      embedder:
-        provider: "openai"
-        config:
-          model: "text-embedding-3-small"
-      vector_store:
-        dimension: 384
-        similarity: "cosine"
-      graph_store:
-        path: "./data/mem0/relationships.db"
   - name: default
     enabled: true

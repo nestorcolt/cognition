@@ -110,32 +110,6 @@ class ConfigManager:
         except KeyError:
             return {"active_provider": "default"}
 
-    def get_mem0_config(self) -> Dict[str, Any]:
-        """Get Mem0-specific configuration"""
-        try:
-            memory_config = self.get_config("memory", validate=False)
-            # Look for mem0 config in providers list
-            for provider in memory_config.get("providers", []):
-                if provider.get("name") == "mem0":
-                    return provider.get("config", {})
-
-            # Return default config if not found
-            return {
-                "storage_path": "./data/mem0",
-                "embedder": {
-                    "provider": "openai",
-                    "config": {"model": "text-embedding-3-small"},
-                },
-            }
-        except KeyError:
-            return {
-                "storage_path": "./data/mem0",
-                "embedder": {
-                    "provider": "openai",
-                    "config": {"model": "text-embedding-3-small"},
-                },
-            }
-
     def get_portkey_config(self) -> Dict[str, Any]:
         """Get Portkey-specific configuration"""
         try:
