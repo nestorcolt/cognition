@@ -20,6 +20,10 @@ class Cognition:
         self.tasks_config = self.config_manager.get_config("tasks")
         self.crew_config = self.config_manager.get_config("crew")
 
+        print(self.agents_config)
+        print(self.tasks_config)
+        print(self.crew_config) 
+
     @agent
     def researcher(self) -> Agent:
         agent = Agent(config=self.agents_config["researcher"], verbose=True)

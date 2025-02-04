@@ -20,7 +20,7 @@ class ConfigSchema(BaseModel):
 class ConfigManager:
     def __init__(self):
         # Convert string path to Path object
-        config_dir = os.environ.get("CONFIG_DIR") or "./src/cognition/lib/config"
+        config_dir = os.environ.get("CONFIG_DIR") or "./config"
         self.config_dir = Path(config_dir).resolve()
 
         if not self.config_dir.exists():
