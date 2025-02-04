@@ -82,16 +82,17 @@ class Cognition:
     @crew
     def crew(self) -> Crew:
         """Creates the Cognition crew"""
-
-        # Get memory configuration from MemoryService
-        memory_config = self.memory_service.get_crew_memory_config()
-
         crew = Crew(
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
-            **memory_config,  # This will expand to memory=True and memory_config={...}
+            memory=True,
+            embedder={
+                "model": "nomic-embed-text",
+                "provider": "ollama",
+                "dimension": 768,
+            },
         )
 
         return crew
