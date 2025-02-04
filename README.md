@@ -1,4 +1,4 @@
-# COGNITION - EDGE
+# COGNITION
 
 ![Cognition AI](./designs/cognition-ai.jpg)
 
