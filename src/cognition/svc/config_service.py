@@ -18,8 +18,12 @@ class ConfigSchema(BaseModel):
 
 
 class ConfigManager:
-    def __init__(self, config_dir: Path):
-        self.config_dir = config_dir
+    def __init__(self):
+        self.config_dir = os.environ.get("CONFIG_DIR") or "./config"
+
+        if not os.path.exists(self.config_dir):
+            raise FileNotFoundError(f"Config directory not found: {self.config_dir}")
+
         self._cache = {}
         self._setup_hot_reload()
         self._load_configs()
@@ -87,6 +91,30 @@ class ConfigManager:
         finally:
             self.observer.stop()
             self.observer.join()
+
+    def get_memory_config(self) -> Dict[str, Any]:
+        """Get memory-specific configuration"""
+        memory_config = self.get_config("memory", validate=False)
+        if not memory_config:
+            return {"active_provider": "default"}
+
+        # Override with environment variables
+        return EnvManager.override_config(memory_config, prefix="CREW_MEMORY_")
+
+    def get_mem0_config(self) -> Dict[str, Any]:
+        """Get Mem0-specific configuration"""
+        mem0_config = self.get_config("mem0", validate=False)
+        if not mem0_config:
+            return {
+                "storage_path": "./data/mem0",
+                "embedder": {
+                    "provider": "openai",
+                    "config": {"model": "text-embedding-3-small"},
+                },
+            }
+
+        # Override with environment variables
+        return EnvManager.override_config(mem0_config, prefix="CREW_MEM0_")
 
 
 class EnvManager:

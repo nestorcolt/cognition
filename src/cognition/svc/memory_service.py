@@ -1,4 +1,5 @@
-from src.cognition.svc.mem0_service import Mem0Provider
+from cognition.svc.config_service import ConfigManager
+from cognition.svc.mem0_service import Mem0Provider
 from typing import Dict, Any
 import random
 import time
@@ -122,23 +123,28 @@ class MemoryService:
     based on configuration.
     """
 
-    def __init__(self, config: Dict[str, Any]):
-        self.config = config
+    def __init__(self, config_manager: ConfigManager):
+        self.config_manager = config_manager
         self.providers: Dict[str, MemoryProvider] = {}
         self._initialize_providers()
 
     def _initialize_providers(self):
         """Initialize configured memory providers"""
+        # Get memory configuration
+        memory_config = self.config_manager.get_memory_config()
+
         # Always initialize default provider
         self.providers["default"] = DefaultMemoryProvider()
 
         # Initialize Mem0 if configured
-        if self.config.get("mem0"):
-            self.providers["mem0"] = Mem0Provider(self.config["mem0"])
+        mem0_config = self.config_manager.get_mem0_config()
+
+        if mem0_config:
+            self.providers["mem0"] = Mem0Provider(mem0_config)
 
         # Set active provider
         self.active_provider = self.providers.get(
-            self.config.get("active_provider", "default"), self.providers["default"]
+            memory_config.get("active_provider", "default"), self.providers["default"]
         )
 
     def switch_provider(self, provider_name: str):

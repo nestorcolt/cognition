@@ -1,25 +1,18 @@
-from crewai import Agent, Crew, Process, Task
+from cognition.svc.config_service import ConfigManager
+from cognition.svc.memory_service import MemoryService
 from crewai.project import CrewBase, agent, crew, task
-from src.cognition.svc.memory_service import MemoryService
-
-# If you want to run a snippet of code before or after the crew starts,
-# you can use the @before_kickoff and @after_kickoff decorators
-# https://docs.crewai.com/concepts/crews#example-crew-class-with-decorators
+from crewai import Agent, Crew, Process, Task
+from pathlib import Path
 
 
 @CrewBase
 class Cognition:
     """Cognition crew"""
 
-    # Learn more about YAML configuration files here:
-    # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
-    # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
     crew_config = "config/crew.yaml"
 
-    # If you would like to add tools to your agents, you can learn more about it here:
-    # https://docs.crewai.com/concepts/agents#agent-tools
     @agent
     def researcher(self) -> Agent:
         agent = Agent(config=self.agents_config["researcher"], verbose=True)
@@ -44,9 +37,6 @@ class Cognition:
         # exit(0)  # Remove this if you want the program to continue
         return agent
 
-    # To learn more about structured task outputs,
-    # task dependencies, and task callbacks, check out the documentation:
-    # https://docs.crewai.com/concepts/tasks#overview-of-a-task
     @task
     def research_task(self) -> Task:
         task = Task(config=self.tasks_config["research_task"])
@@ -74,15 +64,15 @@ class Cognition:
 
     def __init__(self):
         super().__init__()
-        # Initialize memory service using crew_config
-        self.memory_service = MemoryService(self.crew_config.get("memory", {}))
+        # Initialize config manager with config directory
+        config_dir = Path("config")
+        self.config_manager = ConfigManager(config_dir)
+        # Initialize memory service with config manager
+        self.memory_service = MemoryService(self.config_manager)
 
     @crew
     def crew(self) -> Crew:
         """Creates the Cognition crew"""
-        # To learn how to add knowledge sources to your crew, check out the documentation:
-        # https://docs.crewai.com/concepts/knowledge#what-is-knowledge
-        # print(self.crew_config)
 
         crew = Crew(
             agents=self.agents,  # Automatically created by the @agent decorator

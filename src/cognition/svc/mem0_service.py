@@ -1,7 +1,7 @@
-from typing import Dict, Any, Optional
+from cognition.svc.memory_service import MemoryProvider
+from typing import Dict, Any
+from cognition import logger
 from pathlib import Path
-import logging
-from src.cognition.svc.memory_service import MemoryProvider
 
 
 class Mem0Service:
@@ -13,7 +13,7 @@ class Mem0Service:
         self.config = config
         self.storage_path = Path(config.get("storage_path", "./data/mem0"))
         self.storage_path.mkdir(parents=True, exist_ok=True)
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger.getLogger(__name__)
 
         # Initialize components
         self.embedder = config.get(
