@@ -89,7 +89,11 @@ class Cognition:
             process=Process.sequential,
             verbose=True,
             memory=True,
-            memory_config={"provider": "custom", "service": self.memory_service},
+            memory_config={
+                "provider": "custom",
+                "service": self.memory_service,
+                "config": {"user_id": "cognition_user"},  # Add a default user ID
+            },
             embedder={
                 "provider": "ollama",  # Using Ollama as it's free and local
                 "config": {

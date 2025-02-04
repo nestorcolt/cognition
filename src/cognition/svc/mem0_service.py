@@ -1,8 +1,7 @@
 from cognition.svc.provider_base import MemoryProvider
 from cognition.logger import logger
 from typing import Dict, Any
-from pathlib import Path
-import os
+from mem0 import MemoryClient
 
 
 logger = logger.getChild(__name__)
@@ -10,99 +9,59 @@ logger = logger.getChild(__name__)
 
 class Mem0Service:
     """
-    Core Mem0 service implementation handling the actual memory operations
+    Core Mem0 service implementation handling memory operations using the official Mem0 client
     """
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        # Read API key from environment variable
-        self.api_key = os.getenv("MEM_CERO")
-        
-        if not self.api_key:
-            raise ValueError("MEM_CERO environment variable not set")
 
-        self.storage_path = Path(config.get("storage_path", "./data/mem0"))
-        self.storage_path.mkdir(parents=True, exist_ok=True)
+        # Initialize Mem0 client
+        self.client = MemoryClient()
         self.logger = logger
-
-        # Initialize components
-        self.embedder = config.get(
-            "embedder",
-            {"provider": "openai", "config": {"model": "text-embedding-3-small"}},
-        )
-        self._initialize_storage()
-
-    def _initialize_storage(self):
-        """Initialize the required storage backends for Mem0"""
-        try:
-            self._setup_vector_store()
-            self._setup_graph_store()
-            self.logger.info("Mem0 storage initialized successfully")
-        except Exception as e:
-            self.logger.error(f"Failed to initialize Mem0 storage: {str(e)}")
-            raise
-
-    def _setup_vector_store(self):
-        """Setup the vector store for semantic search"""
-        # Implementation for vector store setup using config["vector_store"]
-        pass
-
-    def _setup_graph_store(self):
-        """Setup the graph store for relationship tracking"""
-        # Implementation for graph store setup using config["graph_store"]
-        pass
 
     async def store(self, key: str, value: Any):
         """Store data in Mem0"""
-        # Implementation for storing data
-        self.logger.info(f"Stored key '{key}'")
+        try:
+            # Convert to message format expected by Mem0
+            messages = [
+                {"role": "system", "content": f"Storing data for key: {key}"},
+                {"role": "user", "content": str(value)},
+            ]
+            self.client.add(messages, user_id=key)
+            self.logger.info(f"Stored key '{key}'")
+        except Exception as e:
+            self.logger.error(f"Failed to store data in Mem0: {str(e)}")
+            raise
 
     async def retrieve(self, key: str) -> Any:
         """Retrieve data from Mem0"""
-        # Implementation for retrieving data
-        self.logger.info(f"Retrieved key '{key}'")
-        return None
+        try:
+            # Retrieve conversation history for the given key/user_id
+            history = self.client.get(user_id=key)
+            self.logger.info(f"Retrieved key '{key}'")
+            return history
+        except Exception as e:
+            self.logger.error(f"Failed to retrieve data from Mem0: {str(e)}")
+            raise
 
     async def retrieve_all(self) -> Dict[str, Any]:
         """Retrieve all data from Mem0"""
-        # Implementation for retrieving all data
+        # Note: Mem0 doesn't have a direct method to retrieve all data
+        # This would need to be implemented based on your specific needs
         return {}
 
 
 class Mem0Provider(MemoryProvider):
     """
     Mem0 provider that implements the MemoryProvider interface
-    and manages different memory types
     """
 
     def __init__(self, config: Dict[str, Any]):
         self.mem0 = Mem0Service(config)
-        self.short_term = None  # For RAG/Chroma
-        self.long_term = None  # For SQLite
-        self.entity = None  # For entity tracking
-        self._setup_memory_types()
         self.logger = logger
 
-    def _setup_memory_types(self):
-        """Initialize different memory types"""
-        self.short_term = self._setup_short_term()  # RAG with Chroma
-        self.long_term = self._setup_long_term()  # SQLite
-        self.entity = self._setup_entity()  # RAG for entities
-
-    def _setup_short_term(self):
-        """Setup RAG with Chroma for short-term memory"""
-        pass
-
-    def _setup_long_term(self):
-        """Setup SQLite for long-term memory"""
-        pass
-
-    def _setup_entity(self):
-        """Setup RAG for entity memory"""
-        pass
-
-    def connect(self):
-        """Connect to Mem0 storage"""
+    async def connect(self):
+        """Connect to Mem0"""
         # Mem0 connects during initialization
         pass
 
@@ -115,22 +74,11 @@ class Mem0Provider(MemoryProvider):
         return await self.mem0.retrieve(key)
 
     async def search(self, query: str) -> Dict[str, Any]:
-        """Search memories using Mem0's vector store"""
-        # Implement vector search
-        return {"results": []}  # Will be populated with actual search results
+        """Search memories using Mem0"""
+        # Note: Implement if Mem0 provides search capabilities
+        return {"results": []}
 
-    def get_context(self, context_type: str) -> Dict[str, Any]:
-        """Get context using appropriate memory type"""
-        if context_type == "short_term":
-            return {"type": context_type, "data": self.short_term}
-        elif context_type == "long_term":
-            return {"type": context_type, "data": self.long_term}
-        elif context_type == "entity":
-            return {"type": context_type, "data": self.entity}
+    async def get_context(self, context_type: str) -> Dict[str, Any]:
+        """Get context from Mem0"""
+        # This could be implemented based on how you want to organize different types of memory
         return {"type": context_type, "data": None}
-
-    def __del__(self):
-        """Cleanup resources when the service is destroyed"""
-        # Cleanup vector store
-        # Cleanup graph store
-        self.logger.info("Mem0 service cleaned up")
