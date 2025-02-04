@@ -88,8 +88,8 @@ class Cognition:
             tasks=self.tasks,  # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            # memory=True,
-            # memory_config={"provider": "custom", "service": self.memory_service},
+            memory=True,
+            memory_config={"provider": "custom", "service": self.memory_service},
         )
 
         # for key, value in vars(crew).items():
