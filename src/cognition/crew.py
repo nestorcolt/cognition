@@ -3,6 +3,7 @@ from cognition.svc.memory_service import MemoryService
 from crewai.project import CrewBase, agent, crew, task
 from crewai import Agent, Crew, Process, Task
 from cognition.llm import init_llm
+from pathlib import Path
 
 
 @CrewBase
@@ -17,24 +18,41 @@ class Cognition:
         self.memory_service = MemoryService(self.config_manager)
 
         # Get configs using ConfigManager
-        self.agents_config = f"{self.config_manager.config_dir}/agents.yaml"
-        self.tasks_config = f"{self.config_manager.config_dir}/tasks.yaml"
-        self.crew_config = f"{self.config_manager.config_dir}/crew.yaml"
+        self.agents_config = str(Path(self.config_manager.config_dir) / "agents.yaml")
+        self.tasks_config = str(Path(self.config_manager.config_dir) / "tasks.yaml")
+        self.crew_config = str(Path(self.config_manager.config_dir) / "crew.yaml")
+
+        
+        self.portkey_config = self.config_manager.get_portkey_config()
 
     @agent
     def researcher(self) -> Agent:
-        config = self.agents_config["researcher"]
-        # Initialize LLM with config settings
-        llm = init_llm(model=config["llm"], provider=config["provider"])
-        agent = Agent(config=config, llm=llm, verbose=True)
+        # Get raw config for LLM initialization
+        raw_config = self.config_manager.get_config("agents")["researcher"]
+        # Initialize LLM with config settings and portkey config
+        llm = init_llm(
+            model=raw_config["llm"],
+            provider=raw_config["provider"],
+            portkey_config=self.portkey_config,
+        )
+        # Pass file path to Agent for CrewAI's config loading
+        agent = Agent(config=self.agents_config["researcher"], llm=llm, verbose=True)
         return agent
 
     @agent
     def reporting_analyst(self) -> Agent:
-        config = self.agents_config["reporting_analyst"]
-        # Initialize LLM with config settings
-        llm = init_llm(model=config["llm"], provider=config["provider"])
-        agent = Agent(config=config, llm=llm, verbose=True)
+        # Get raw config for LLM initialization
+        raw_config = self.config_manager.get_config("agents")["reporting_analyst"]
+        # Initialize LLM with config settings and portkey config
+        llm = init_llm(
+            model=raw_config["llm"],
+            provider=raw_config["provider"],
+            portkey_config=self.portkey_config,
+        )
+        # Pass file path to Agent for CrewAI's config loading
+        agent = Agent(
+            config=self.agents_config["reporting_analyst"], llm=llm, verbose=True
+        )
         return agent
 
     @task

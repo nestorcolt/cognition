@@ -20,7 +20,7 @@ class ConfigSchema(BaseModel):
 class ConfigManager:
     def __init__(self):
         # Convert string path to Path object
-        config_dir = os.environ.get("CONFIG_DIR") or "config"
+        config_dir = os.environ.get("CONFIG_DIR") or "src/cognition/config"
         self.config_dir = Path(config_dir).resolve()
 
         if not self.config_dir.exists():
@@ -134,6 +134,26 @@ class ConfigManager:
                     "provider": "openai",
                     "config": {"model": "text-embedding-3-small"},
                 },
+            }
+
+    def get_portkey_config(self) -> Dict[str, Any]:
+        """Get Portkey-specific configuration"""
+        try:
+            config = self.get_config("portkey", validate=False)
+            if not config:
+                return {
+                    "cache": {
+                        "mode": "semantic",
+                    },
+                    "metadata": {"environment": "development", "project": "cognition"},
+                }
+            return EnvManager.override_config(config, prefix="PORTKEY_")
+        except KeyError:
+            return {
+                "cache": {
+                    "mode": "semantic",
+                },
+                "metadata": {"environment": "development", "project": "cognition"},
             }
 
 

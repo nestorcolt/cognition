@@ -1,10 +1,13 @@
-from crewai import LLM
 from portkey_ai import createHeaders, PORTKEY_GATEWAY_URL
+from typing import Dict, Any
+from crewai import LLM
 import os
 
 
 def init_llm(
-    model: str = "claude-3-5-haiku-20241022", provider: str = "anthropic"
+    model: str = "claude-3-5-haiku-20241022",
+    provider: str = "anthropic",
+    portkey_config: Dict[str, Any] = None,
 ) -> LLM:
     """Initialize LLM with Portkey integration"""
 
@@ -17,6 +20,9 @@ def init_llm(
             "PORTKEY_API_KEY and PORTKEY_VIRTUAL_KEY must be set in environment variables"
         )
 
+    # Use provided config or empty dict if None
+    config = portkey_config or {}
+
     # Configure LLM with Portkey integration
     llm = LLM(
         model=model,
@@ -25,12 +31,7 @@ def init_llm(
         extra_headers=createHeaders(
             api_key=portkey_api_key,
             virtual_key=virtual_key,
-            config={
-                "cache": {
-                    "mode": "semantic",  # Enable semantic caching
-                },
-                "metadata": {"environment": "development", "project": "cognition"},
-            },
+            config=config,
         ),
     )
 
