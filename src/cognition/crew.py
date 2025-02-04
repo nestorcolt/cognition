@@ -83,20 +83,15 @@ class Cognition:
     def crew(self) -> Crew:
         """Creates the Cognition crew"""
 
+        # Get memory configuration from MemoryService
+        memory_config = self.memory_service.get_crew_memory_config()
+
         crew = Crew(
-            agents=self.agents,  # Automatically created by the @agent decorator
-            tasks=self.tasks,  # Automatically created by the @task decorator
+            agents=self.agents,
+            tasks=self.tasks,
             process=Process.sequential,
             verbose=True,
-            memory=True,
-            memory_config={
-                "provider": "mem0",
-                "config": {"user_id": "cognition_user"},  # Add a default user ID
-            },
-            embedder={"provider": "ollama", "config": {"model": "mxbai-embed-large"}},
+            **memory_config,  # This will expand to memory=True and memory_config={...}
         )
-
-        # for key, value in vars(crew).items():
-        #     print(f"{key}: {value}")
 
         return crew

@@ -1,4 +1,8 @@
 active_provider: "default"
+storage_path: "./data/memory"
+embedder:
+  model: "nomic-embed-text"
+  dimension: 768
 providers:
   - name: default
     enabled: true
