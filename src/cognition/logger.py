@@ -9,7 +9,7 @@ import os
 
 # Initialize colorama
 init()
-LOGGER_NAME = "cognition"
+LOGGER_NAME = "COG"
 
 # Define log levels
 log_levels = {
@@ -24,7 +24,7 @@ log_levels = {
 }
 
 # Get log level from environment variable first
-env_log_level = os.getenv("APP_LOG_LEVEL", "DEBUG").upper()
+env_log_level = os.getenv("APP_LOG_LEVEL", "INFO").upper()
 DEFAULT_LOG_LEVEL = log_levels.get(env_log_level, logging.DEBUG)
 
 

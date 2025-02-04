@@ -1,7 +1,10 @@
 from cognition.svc.provider_base import MemoryProvider
+from cognition.logger import logger
 from typing import Dict, Any
-from cognition import logger
 from pathlib import Path
+
+
+logger = logger.getChild(__name__)
 
 
 class Mem0Service:
@@ -13,7 +16,7 @@ class Mem0Service:
         self.config = config
         self.storage_path = Path(config.get("storage_path", "./data/mem0"))
         self.storage_path.mkdir(parents=True, exist_ok=True)
-        self.logger = logger.getLogger(__name__)
+        self.logger = logger
 
         # Initialize components
         self.embedder = config.get(
@@ -71,6 +74,7 @@ class Mem0Provider(MemoryProvider):
         self.long_term = None  # For SQLite
         self.entity = None  # For entity tracking
         self._setup_memory_types()
+        self.logger = logger
 
     def _setup_memory_types(self):
         """Initialize different memory types"""

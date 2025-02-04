@@ -99,17 +99,26 @@ class ConfigManager:
 
     def get_memory_config(self) -> Dict[str, Any]:
         """Get memory-specific configuration"""
-        memory_config = self.get_config("memory", validate=False)
-        if not memory_config:
-            return {"active_provider": "default"}
+        try:
+            config = self.get_config("memory", validate=False)
+            if not config:
+                return {"active_provider": "default"}
 
-        # Override with environment variables
-        return EnvManager.override_config(memory_config, prefix="CREW_MEMORY_")
+            # Override with environment variables
+            return EnvManager.override_config(config, prefix="CREW_MEMORY_")
+        except KeyError:
+            return {"active_provider": "default"}
 
     def get_mem0_config(self) -> Dict[str, Any]:
         """Get Mem0-specific configuration"""
-        mem0_config = self.get_config("mem0", validate=False)
-        if not mem0_config:
+        try:
+            memory_config = self.get_config("memory", validate=False)
+            # Look for mem0 config in providers list
+            for provider in memory_config.get("providers", []):
+                if provider.get("name") == "mem0":
+                    return provider.get("config", {})
+
+            # Return default config if not found
             return {
                 "storage_path": "./data/mem0",
                 "embedder": {
@@ -117,9 +126,14 @@ class ConfigManager:
                     "config": {"model": "text-embedding-3-small"},
                 },
             }
-
-        # Override with environment variables
-        return EnvManager.override_config(mem0_config, prefix="CREW_MEM0_")
+        except KeyError:
+            return {
+                "storage_path": "./data/mem0",
+                "embedder": {
+                    "provider": "openai",
+                    "config": {"model": "text-embedding-3-small"},
+                },
+            }
 
 
 class EnvManager:
