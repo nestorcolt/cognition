@@ -8,16 +8,17 @@ from crewai import Agent, Crew, Process, Task
 class Cognition:
     """Cognition crew"""
 
-    agents_config = "config/agents.yaml"
-    tasks_config = "config/tasks.yaml"
-    crew_config = "config/crew.yaml"
-
     def __init__(self):
         super().__init__()
         # Initialize config manager with config directory
         self.config_manager = ConfigManager()
         # Initialize memory service with config manager
         self.memory_service = MemoryService(self.config_manager)
+
+        # Get configs using ConfigManager
+        self.agents_config = self.config_manager.get_config("agents")
+        self.tasks_config = self.config_manager.get_config("tasks")
+        self.crew_config = self.config_manager.get_config("crew")
 
     @agent
     def researcher(self) -> Agent:
