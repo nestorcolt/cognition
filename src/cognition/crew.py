@@ -2,7 +2,6 @@ from cognition.svc.config_service import ConfigManager
 from cognition.svc.memory_service import MemoryService
 from crewai.project import CrewBase, agent, crew, task
 from crewai import Agent, Crew, Process, Task
-from pathlib import Path
 
 
 @CrewBase
@@ -12,6 +11,13 @@ class Cognition:
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
     crew_config = "config/crew.yaml"
+
+    def __init__(self):
+        super().__init__()
+        # Initialize config manager with config directory
+        self.config_manager = ConfigManager()
+        # Initialize memory service with config manager
+        self.memory_service = MemoryService(self.config_manager)
 
     @agent
     def researcher(self) -> Agent:
@@ -61,13 +67,6 @@ class Cognition:
 
         # exit(0)  # Remove this if you want the program to continue
         return task
-
-    def __init__(self):
-        super().__init__()
-        # Initialize config manager with config directory
-        self.config_manager = ConfigManager()
-        # Initialize memory service with config manager
-        self.memory_service = MemoryService(self.config_manager)
 
     @crew
     def crew(self) -> Crew:
