@@ -1,5 +1,6 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
+from src.cognition.svc.memory_service import MemoryService
 
 # If you want to run a snippet of code before or after the crew starts,
 # you can use the @before_kickoff and @after_kickoff decorators
@@ -71,6 +72,11 @@ class Cognition:
         # exit(0)  # Remove this if you want the program to continue
         return task
 
+    def __init__(self):
+        super().__init__()
+        # Initialize memory service using crew_config
+        self.memory_service = MemoryService(self.crew_config.get("memory", {}))
+
     @crew
     def crew(self) -> Crew:
         """Creates the Cognition crew"""
@@ -83,8 +89,8 @@ class Cognition:
             tasks=self.tasks,  # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            # config=self.crew_config[0],
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
+            memory=True,
+            memory_config={"provider": "custom", "service": self.memory_service},
         )
 
         # for key, value in vars(crew).items():

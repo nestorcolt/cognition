@@ -1,29 +1,30 @@
 from typing import Dict, Any, Optional
 from pathlib import Path
 import logging
+from src.cognition.svc.memory_service import MemoryProvider
+
 
 class Mem0Service:
     """
-    Mem0Service provides integration with Mem0's open-source memory layer.
-    It works alongside the existing MemoryService to provide enhanced memory capabilities
-    while maintaining compatibility with the project's architecture.
+    Core Mem0 service implementation handling the actual memory operations
     """
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.storage_path = Path(config.get("storage_path", "./data/mem0"))
         self.storage_path.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger(__name__)
-        
-        # Initialize Mem0 components
+
+        # Initialize components
+        self.embedder = config.get(
+            "embedder",
+            {"provider": "openai", "config": {"model": "text-embedding-3-small"}},
+        )
         self._initialize_storage()
 
     def _initialize_storage(self):
         """Initialize the required storage backends for Mem0"""
         try:
-            # Here we'll initialize vector store and graph database
-            # For self-hosted setup, we can use:
-            # - ChromaDB for vector storage (lightweight, embedded)
-            # - SQLite for graph relationships (simple, embedded)
             self._setup_vector_store()
             self._setup_graph_store()
             self.logger.info("Mem0 storage initialized successfully")
@@ -33,82 +34,92 @@ class Mem0Service:
 
     def _setup_vector_store(self):
         """Setup the vector store for semantic search"""
-        # Implementation for vector store setup
+        # Implementation for vector store setup using config["vector_store"]
         pass
 
     def _setup_graph_store(self):
         """Setup the graph store for relationship tracking"""
-        # Implementation for graph store setup
+        # Implementation for graph store setup using config["graph_store"]
         pass
 
-    async def add_memory(self, content: Dict[str, Any]):
-        """
-        Add new memory content to both vector and graph stores.
-        
-        Args:
-            content: Dictionary containing the memory content
-                    (e.g., conversation, entities, relationships)
-        """
-        try:
-            # Process the content to extract entities and relationships
-            # Store in vector store for semantic search
-            # Store in graph store for relationship queries
-            self.logger.info("Memory added successfully")
-        except Exception as e:
-            self.logger.error(f"Failed to add memory: {str(e)}")
-            raise
+    async def store(self, key: str, value: Any):
+        """Store data in Mem0"""
+        # Implementation for storing data
+        self.logger.info(f"Stored key '{key}'")
 
-    async def search_memories(self, query: str) -> Dict[str, Any]:
-        """
-        Search for relevant memories using both semantic and graph-based search.
-        
-        Args:
-            query: The search query string
-            
-        Returns:
-            Dict containing relevant memories and their relationships
-        """
-        try:
-            # Combine results from:
-            # 1. Vector store (semantic search)
-            # 2. Graph store (relationship-based search)
-            return {
-                "memories": [],  # Relevant memories
-                "relationships": [],  # Related entities and their connections
-                "context": {}  # Additional context
-            }
-        except Exception as e:
-            self.logger.error(f"Failed to search memories: {str(e)}")
-            raise
+    async def retrieve(self, key: str) -> Any:
+        """Retrieve data from Mem0"""
+        # Implementation for retrieving data
+        self.logger.info(f"Retrieved key '{key}'")
+        return None
 
-    async def update_memory(self, memory_id: str, content: Dict[str, Any]):
-        """Update existing memory content"""
-        try:
-            # Update both vector and graph stores
-            self.logger.info(f"Memory {memory_id} updated successfully")
-        except Exception as e:
-            self.logger.error(f"Failed to update memory: {str(e)}")
-            raise
+    async def retrieve_all(self) -> Dict[str, Any]:
+        """Retrieve all data from Mem0"""
+        # Implementation for retrieving all data
+        return {}
+
+
+class Mem0Provider(MemoryProvider):
+    """
+    Mem0 provider that implements the MemoryProvider interface
+    and manages different memory types
+    """
+
+    def __init__(self, config: Dict[str, Any]):
+        self.mem0 = Mem0Service(config)
+        self.short_term = None  # For RAG/Chroma
+        self.long_term = None  # For SQLite
+        self.entity = None  # For entity tracking
+        self._setup_memory_types()
+
+    def _setup_memory_types(self):
+        """Initialize different memory types"""
+        self.short_term = self._setup_short_term()  # RAG with Chroma
+        self.long_term = self._setup_long_term()  # SQLite
+        self.entity = self._setup_entity()  # RAG for entities
+
+    def _setup_short_term(self):
+        """Setup RAG with Chroma for short-term memory"""
+        pass
+
+    def _setup_long_term(self):
+        """Setup SQLite for long-term memory"""
+        pass
+
+    def _setup_entity(self):
+        """Setup RAG for entity memory"""
+        pass
+
+    def connect(self):
+        """Connect to Mem0 storage"""
+        # Mem0 connects during initialization
+        pass
+
+    async def set(self, key: str, value: Any):
+        """Store memory using Mem0"""
+        await self.mem0.store(key, value)
+
+    async def get(self, key: str) -> Any:
+        """Retrieve memory using Mem0"""
+        return await self.mem0.retrieve(key)
+
+    async def search(self, query: str) -> Dict[str, Any]:
+        """Search memories using Mem0's vector store"""
+        # Implement vector search
+        return {"results": []}  # Will be populated with actual search results
 
     def get_context(self, context_type: str) -> Dict[str, Any]:
-        """
-        Retrieve context-specific memories and relationships.
-        
-        Args:
-            context_type: Type of context to retrieve (e.g., "user_preferences", "conversation_history")
-            
-        Returns:
-            Dict containing context-specific information
-        """
-        try:
-            # Retrieve and combine relevant context from both stores
-            return {}
-        except Exception as e:
-            self.logger.error(f"Failed to get context: {str(e)}")
-            raise
+        """Get context using appropriate memory type"""
+        if context_type == "short_term":
+            return {"type": context_type, "data": self.short_term}
+        elif context_type == "long_term":
+            return {"type": context_type, "data": self.long_term}
+        elif context_type == "entity":
+            return {"type": context_type, "data": self.entity}
+        return {"type": context_type, "data": None}
 
     def __del__(self):
         """Cleanup resources when the service is destroyed"""
         # Cleanup vector store
         # Cleanup graph store
-        self.logger.info("Mem0 service cleaned up") 
+        self.logger.info("Mem0 service cleaned up")
