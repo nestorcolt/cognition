@@ -2,7 +2,7 @@ from cognition.svc.config_service import ConfigManager
 from cognition.svc.memory_service import MemoryService
 from crewai.project import CrewBase, agent, crew, task
 from crewai import Agent, Crew, Process, Task
-from cognition.llm import init_llm
+from cognition.llm import init_portkey_llm
 from pathlib import Path
 
 
@@ -14,6 +14,7 @@ class Cognition:
         super().__init__()
         # Initialize config manager with config directory
         self.config_manager = ConfigManager()
+
         # Initialize memory service with config manager
         self.memory_service = MemoryService(self.config_manager)
 
@@ -22,7 +23,7 @@ class Cognition:
         self.tasks_config = str(Path(self.config_manager.config_dir) / "tasks.yaml")
         self.crew_config = str(Path(self.config_manager.config_dir) / "crew.yaml")
 
-        
+        # LLM GATEWAY CONFIG
         self.portkey_config = self.config_manager.get_portkey_config()
 
     @agent
@@ -30,7 +31,7 @@ class Cognition:
         # Get raw config for LLM initialization
         raw_config = self.config_manager.get_config("agents")["researcher"]
         # Initialize LLM with config settings and portkey config
-        llm = init_llm(
+        llm = init_portkey_llm(
             model=raw_config["llm"],
             provider=raw_config["provider"],
             portkey_config=self.portkey_config,
@@ -44,7 +45,7 @@ class Cognition:
         # Get raw config for LLM initialization
         raw_config = self.config_manager.get_config("agents")["reporting_analyst"]
         # Initialize LLM with config settings and portkey config
-        llm = init_llm(
+        llm = init_portkey_llm(
             model=raw_config["llm"],
             provider=raw_config["provider"],
             portkey_config=self.portkey_config,
@@ -89,7 +90,7 @@ class Cognition:
             tasks=self.tasks,  # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            memory=True,
+            # memory=True,
             # memory_config={"provider": "custom", "service": self.memory_service},
         )
 

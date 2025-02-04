@@ -4,9 +4,9 @@ from crewai import LLM
 import os
 
 
-def init_llm(
-    model: str = "claude-3-5-haiku-20241022",
-    provider: str = "anthropic",
+def init_portkey_llm(
+    model: str,
+    provider: str,
     portkey_config: Dict[str, Any] = None,
 ) -> LLM:
     """Initialize LLM with Portkey integration"""
@@ -26,6 +26,7 @@ def init_llm(
     # Configure LLM with Portkey integration
     llm = LLM(
         model=model,
+        provider=provider,
         base_url=PORTKEY_GATEWAY_URL,
         api_key="dummy",  # Using Virtual key instead
         extra_headers=createHeaders(
