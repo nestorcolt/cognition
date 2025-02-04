@@ -20,7 +20,7 @@ class ConfigSchema(BaseModel):
 class ConfigManager:
     def __init__(self):
         # Convert string path to Path object
-        config_dir = os.environ.get("CONFIG_DIR") or "./config"
+        config_dir = os.environ.get("CONFIG_DIR") or "config"
         self.config_dir = Path(config_dir).resolve()
 
         if not self.config_dir.exists():
@@ -70,6 +70,7 @@ class ConfigManager:
     def get_config(self, name: str, validate: bool = True) -> Dict[str, Any]:
         """Get config with optional validation"""
         config = self._cache.get(name)
+
         if config is None:
             raise KeyError(f"Configuration '{name}' not found")
 

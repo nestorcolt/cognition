@@ -2,6 +2,7 @@ from cognition.svc.config_service import ConfigManager
 from cognition.svc.memory_service import MemoryService
 from crewai.project import CrewBase, agent, crew, task
 from crewai import Agent, Crew, Process, Task
+from cognition.llm import init_llm
 
 
 @CrewBase
@@ -16,36 +17,24 @@ class Cognition:
         self.memory_service = MemoryService(self.config_manager)
 
         # Get configs using ConfigManager
-        self.agents_config = self.config_manager.get_config("agents")
-        self.tasks_config = self.config_manager.get_config("tasks")
-        self.crew_config = self.config_manager.get_config("crew")
-
-        print(self.agents_config)
-        print(self.tasks_config)
-        print(self.crew_config) 
+        self.agents_config = f"{self.config_manager.config_dir}/agents.yaml"
+        self.tasks_config = f"{self.config_manager.config_dir}/tasks.yaml"
+        self.crew_config = f"{self.config_manager.config_dir}/crew.yaml"
 
     @agent
     def researcher(self) -> Agent:
-        agent = Agent(config=self.agents_config["researcher"], verbose=True)
-        # print(self.agents_config)
-        print(self.crew_config)
-
-        # Print all properties of the agent
-        # for key, value in vars(agent).items():
-        #     print(f"{key}: {value}")
-
-        # exit(0)  # Remove this if you want the program to continue
+        config = self.agents_config["researcher"]
+        # Initialize LLM with config settings
+        llm = init_llm(model=config["llm"], provider=config["provider"])
+        agent = Agent(config=config, llm=llm, verbose=True)
         return agent
 
     @agent
     def reporting_analyst(self) -> Agent:
-        agent = Agent(config=self.agents_config["reporting_analyst"], verbose=True)
-
-        # Print all properties of the agent
-        # for key, value in vars(agent).items():
-        #     print(f"{key}: {value}")
-
-        # exit(0)  # Remove this if you want the program to continue
+        config = self.agents_config["reporting_analyst"]
+        # Initialize LLM with config settings
+        llm = init_llm(model=config["llm"], provider=config["provider"])
+        agent = Agent(config=config, llm=llm, verbose=True)
         return agent
 
     @task
@@ -83,11 +72,10 @@ class Cognition:
             process=Process.sequential,
             verbose=True,
             memory=True,
-            memory_config={"provider": "custom", "service": self.memory_service},
+            # memory_config={"provider": "custom", "service": self.memory_service},
         )
 
         # for key, value in vars(crew).items():
         #     print(f"{key}: {value}")
 
-        exit(0)
         return crew
