@@ -90,16 +90,10 @@ class Cognition:
             verbose=True,
             memory=True,
             memory_config={
-                "provider": "custom",
-                "service": self.memory_service,
+                "provider": "mem0",
                 "config": {"user_id": "cognition_user"},  # Add a default user ID
             },
-            embedder={
-                "provider": "ollama",  # Using Ollama as it's free and local
-                "config": {
-                    "model": "nomic-embed-text"  # A good default embedding model
-                },
-            },
+            embedder={"provider": "ollama", "config": {"model": "mxbai-embed-large"}},
         )
 
         # for key, value in vars(crew).items():
