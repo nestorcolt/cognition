@@ -33,7 +33,6 @@ class Cognition:
         # Initialize LLM with config settings and portkey config
         llm = init_portkey_llm(
             model=raw_config["llm"],
-            provider=raw_config["provider"],
             portkey_config=self.portkey_config,
         )
         # Pass file path to Agent for CrewAI's config loading
@@ -47,7 +46,6 @@ class Cognition:
         # Initialize LLM with config settings and portkey config
         llm = init_portkey_llm(
             model=raw_config["llm"],
-            provider=raw_config["provider"],
             portkey_config=self.portkey_config,
         )
         # Pass file path to Agent for CrewAI's config loading
