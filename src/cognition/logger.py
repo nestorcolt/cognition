@@ -9,6 +9,7 @@ import os
 
 # Initialize colorama
 init()
+LOGGER_NAME = "cognition"
 
 # Define log levels
 log_levels = {
@@ -62,7 +63,7 @@ class LoggerSetup:
         self,
         log_level: int = DEFAULT_LOG_LEVEL,  # Use the environment-based default
         log_file: Optional[Path] = None,
-        module_name: str = "cognitive-flow",
+        module_name: str = LOGGER_NAME,
     ):
         # Skip if already initialized
         if self._initialized:
@@ -111,7 +112,7 @@ class LoggerSetup:
 
 
 def setup_logger(
-    module_name: str = "cognitive-flow",
+    module_name: str = LOGGER_NAME,
     log_level: int = DEFAULT_LOG_LEVEL,  # Use the environment-based default
     log_file: Optional[Path] = None,
 ) -> logging.Logger:
