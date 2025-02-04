@@ -2,6 +2,7 @@ from cognition.svc.provider_base import MemoryProvider
 from cognition.logger import logger
 from typing import Dict, Any
 from pathlib import Path
+import os
 
 
 logger = logger.getChild(__name__)
@@ -14,6 +15,12 @@ class Mem0Service:
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
+        # Read API key from environment variable
+        self.api_key = os.getenv("MEM_CERO")
+        
+        if not self.api_key:
+            raise ValueError("MEM_CERO environment variable not set")
+
         self.storage_path = Path(config.get("storage_path", "./data/mem0"))
         self.storage_path.mkdir(parents=True, exist_ok=True)
         self.logger = logger

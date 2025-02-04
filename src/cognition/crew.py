@@ -90,6 +90,12 @@ class Cognition:
             verbose=True,
             memory=True,
             memory_config={"provider": "custom", "service": self.memory_service},
+            embedder={
+                "provider": "ollama",  # Using Ollama as it's free and local
+                "config": {
+                    "model": "nomic-embed-text"  # A good default embedding model
+                },
+            },
         )
 
         # for key, value in vars(crew).items():
