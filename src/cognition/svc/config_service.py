@@ -19,9 +19,11 @@ class ConfigSchema(BaseModel):
 
 class ConfigManager:
     def __init__(self):
-        self.config_dir = os.environ.get("CONFIG_DIR") or "./config"
+        # Convert string path to Path object
+        config_dir = os.environ.get("CONFIG_DIR") or "./config"
+        self.config_dir = Path(config_dir).resolve()
 
-        if not os.path.exists(self.config_dir):
+        if not self.config_dir.exists():
             raise FileNotFoundError(f"Config directory not found: {self.config_dir}")
 
         self._cache = {}
@@ -40,19 +42,22 @@ class ConfigManager:
             self.observer.join()
 
     def _load_configs(self):
+        """Load all YAML configs from config directory"""
         for config_file in self.config_dir.glob("*.yaml"):
             self._load_file(config_file)
 
     def _load_file(self, file_path: Path) -> Dict[str, Any]:
+        """Load and parse a single config file"""
         if not file_path.exists():
             raise FileNotFoundError(f"Config file not found: {file_path}")
 
         try:
-            with open(file_path) as f:
+            with file_path.open() as f:
                 config = yaml.safe_load(f)
                 if not isinstance(config, dict):
                     raise ValueError(f"Invalid YAML structure in {file_path}")
                 self._cache[file_path.stem] = config
+                return config
         except yaml.YAMLError as e:
             raise ConfigValidationError(f"YAML parsing error in {file_path}: {str(e)}")
 

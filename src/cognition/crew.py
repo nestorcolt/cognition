@@ -65,8 +65,7 @@ class Cognition:
     def __init__(self):
         super().__init__()
         # Initialize config manager with config directory
-        config_dir = Path("config")
-        self.config_manager = ConfigManager(config_dir)
+        self.config_manager = ConfigManager()
         # Initialize memory service with config manager
         self.memory_service = MemoryService(self.config_manager)
 

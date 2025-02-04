@@ -1,4 +1,4 @@
-from cognition.svc.memory_service import MemoryProvider
+from cognition.svc.provider_base import MemoryProvider
 from typing import Dict, Any
 from cognition import logger
 from pathlib import Path
