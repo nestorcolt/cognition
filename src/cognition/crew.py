@@ -26,8 +26,6 @@ class Cognition:
         # LLM GATEWAY CONFIG
         self.portkey_config = self.config_manager.get_portkey_config()
 
-        exit(0)
-
     @agent
     def researcher(self) -> Agent:
         # Get raw config for LLM initialization

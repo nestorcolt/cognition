@@ -34,10 +34,11 @@ class ExternalSQLHandler(BaseStorageHandler):
 
     def connect(self):
         """Initialize connection pool"""
-        self.pool = create_engine(self.connection_string).pool()
+        self.engine = create_engine(self.connection_string)
+        self.pool = self.engine.pool
 
     def save(self, task_description: str, metadata: dict, datetime: str, score: float):
-        with self.pool.connect() as conn:
+        with self.engine.connect() as conn:
             conn.execute(
                 text(
                     """
@@ -53,6 +54,7 @@ class ExternalSQLHandler(BaseStorageHandler):
                     "score": score,
                 },
             )
+            conn.commit()
 
 
 # Step 3: Custom Long Term Memory
