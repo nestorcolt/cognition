@@ -1,114 +1,140 @@
-from crewai.memory.long_term.long_term_memory_item import LongTermMemoryItem
 from crewai.memory.long_term.long_term_memory import LongTermMemory
-from sqlalchemy import create_engine, text
-from typing import Dict, List, Optional
-from datetime import datetime
-from crewai import Crew
+from crewai.memory.long_term.long_term_memory_item import LongTermMemoryItem
+from typing import Dict, List, Any, Optional
+from psycopg2.extras import DictCursor
+from crewai.utilities import Printer
+from datetime import datetime as dt
+import psycopg2
 import json
 
 
-# Step 1: Create Base Storage Handler
-class BaseStorageHandler:
-    def connect(self):
-        raise NotImplementedError
+class LTMPostgresStorage:
+    """PostgreSQL storage class for LTM data storage."""
 
-    def disconnect(self):
-        raise NotImplementedError
-
-    def save(self, task_description: str, metadata: dict, datetime: str, score: float):
-        raise NotImplementedError
-
-    def load(self, task_description: str, latest_n: int) -> List[Dict]:
-        raise NotImplementedError
-
-    def reset(self):
-        raise NotImplementedError
-
-
-# Step 2: Implement External SQL Handler
-class ExternalSQLHandler(BaseStorageHandler):
-    def __init__(self, connection_string: str, pool_size: int = 5):
+    def __init__(
+        self,
+        connection_string: str,
+    ) -> None:
         self.connection_string = connection_string
-        self.pool_size = pool_size
-        self.pool = None
+        self._printer = Printer()
+        self._initialize_db()
 
-    def connect(self):
-        """Initialize connection pool"""
-        self.engine = create_engine(self.connection_string)
-        self.pool = self.engine.pool
-
-    def save(self, task_description: str, metadata: dict, datetime: str, score: float):
-        """Save memory to database"""
-        with self.engine.connect() as conn:
-            # Convert Unix timestamp to proper datetime
-            timestamp = datetime if isinstance(datetime, str) else str(datetime)
-            formatted_datetime = text("to_timestamp(:dt)")
-
-            conn.execute(
-                text(
-                    """
-                    INSERT INTO long_term_memories 
-                    (task_description, metadata, datetime, score)
-                    VALUES (:task, :meta, """
-                    + formatted_datetime.text
-                    + """, :score)
-                    """
-                ),
-                {
-                    "task": task_description,
-                    "meta": json.dumps(metadata),
-                    "dt": timestamp,
-                    "score": score,
-                },
-            )
-            conn.commit()
-
-    def load(self, task_description: str, latest_n: int) -> List[Dict]:
-        """Load the latest n memories related to the task description"""
-        with self.engine.connect() as conn:
-            result = conn.execute(
-                text(
-                    """
-                    SELECT task_description, metadata, datetime, score
-                    FROM long_term_memories
-                    WHERE task_description LIKE :task
-                    ORDER BY datetime DESC
-                    LIMIT :n
-                    """
-                ),
-                {"task": f"%{task_description}%", "n": latest_n},
+    def _initialize_db(self):
+        """Initialize the PostgreSQL database and create LTM table."""
+        try:
+            with psycopg2.connect(self.connection_string) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        CREATE TABLE IF NOT EXISTS long_term_memories (
+                            id SERIAL PRIMARY KEY,
+                            task_description TEXT,
+                            metadata JSONB,
+                            datetime TEXT,
+                            score FLOAT
+                        )
+                        """
+                    )
+                conn.commit()
+        except Exception as e:
+            self._printer.print(
+                content=f"MEMORY ERROR: Database initialization failed: {e}",
+                color="red",
             )
 
-            memories = []
-            for row in result:
-                memories.append(
-                    {
-                        "task": row.task_description,
-                        "metadata": json.loads(row.metadata),
-                        "datetime": row.datetime,
-                        "score": row.score,
-                    }
-                )
+    def save(
+        self,
+        task_description: str,
+        metadata: Dict[str, Any],
+        datetime: str,
+        score: float,
+    ) -> None:
+        try:
+            # Convert Unix timestamp to ISO format
+            formatted_datetime = dt.fromtimestamp(float(datetime)).isoformat()
 
-            return memories
+            with psycopg2.connect(self.connection_string) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        """
+                        INSERT INTO long_term_memories 
+                        (task_description, metadata, datetime, score)
+                        VALUES (%s, %s, %s, %s)
+                        """,
+                        (
+                            task_description,
+                            json.dumps(metadata),
+                            formatted_datetime,
+                            score,
+                        ),
+                    )
+                conn.commit()
+        except Exception as e:
+            self._printer.print(
+                content=f"MEMORY ERROR: Save operation failed: {e}",
+                color="red",
+            )
+
+    def load(self, task_description: str, latest_n: int) -> List[Dict[str, Any]]:
+        try:
+            with psycopg2.connect(self.connection_string) as conn:
+                with conn.cursor(cursor_factory=DictCursor) as cursor:
+                    cursor.execute(
+                        """
+                        SELECT task_description, metadata, datetime, score
+                        FROM long_term_memories
+                        WHERE task_description LIKE %s
+                        ORDER BY datetime DESC
+                        LIMIT %s
+                        """,
+                        (f"%{task_description}%", latest_n),
+                    )
+                    rows = cursor.fetchall()
+                    return [
+                        {
+                            "task": row["task_description"],
+                            "metadata": row["metadata"],
+                            "datetime": row["datetime"],
+                            "score": row["score"],
+                        }
+                        for row in rows
+                    ]
+        except Exception as e:
+            self._printer.print(
+                content=f"MEMORY ERROR: Load operation failed: {e}",
+                color="red",
+            )
+            return []
+
+    def reset(self) -> None:
+        try:
+            with psycopg2.connect(self.connection_string) as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("DELETE FROM long_term_memories")
+                conn.commit()
+        except Exception as e:
+            self._printer.print(
+                content=f"MEMORY ERROR: Reset operation failed: {e}",
+                color="red",
+            )
 
 
-# Step 3: Custom Long Term Memory
+# Remove BaseStorageHandler and ExternalSQLHandler classes
+# Keep CustomLongTermMemory but simplify it
 class CustomLongTermMemory(LongTermMemory):
-    def __init__(self, storage: BaseStorageHandler, *args, **kwargs):
-        super(CustomLongTermMemory, self).__init__(*args, **kwargs)
-        self.storage = storage
-        self.storage.connect()
+    def __init__(self, connection_string: str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.storage = LTMPostgresStorage(connection_string)
 
     def save(self, item: LongTermMemoryItem):
-        metadata = item.metadata
+        metadata = item.metadata.copy()
         metadata.update({"agent": item.agent, "expected_output": item.expected_output})
 
         self.storage.save(
             task_description=item.task,
             metadata=metadata,
             datetime=item.datetime,
-            score=metadata["quality"],
+            score=metadata.get("quality", 0.0),
         )
 
     def search(self, task: str, latest_n: int = 3) -> List[Dict]:

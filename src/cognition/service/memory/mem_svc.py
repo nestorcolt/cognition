@@ -1,5 +1,5 @@
-from cognition.service.memory.long_term import CustomLongTermMemory, ExternalSQLHandler
 from crewai.memory.long_term.long_term_memory import LongTermMemory
+from cognition.service.memory.long_term import CustomLongTermMemory
 from cognition.service.config_service import ConfigManager
 from cognition import logger
 
@@ -73,8 +73,7 @@ class MemoryService:
                 "your_password", self.config_manager.get_db_password()
             )
 
-            storage = ExternalSQLHandler(connection_string)
-            memory = CustomLongTermMemory(storage)
+            memory = CustomLongTermMemory(connection_string)
             logger.debug(f"Long term memory: {memory.__class__.__name__}")
             return memory
 
