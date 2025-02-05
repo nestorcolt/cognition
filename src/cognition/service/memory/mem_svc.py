@@ -28,6 +28,7 @@ class MemoryService:
 
     def get_storage_path(self) -> str:
         """Get the storage path for memory data"""
+        logger.debug(f"Storage Path Requested: {self.storage_path}")
         return self.storage_path
 
     def _initialize_config(self):
@@ -67,41 +68,17 @@ class MemoryService:
                 )
                 return
 
+            # replace the password with the actual password
+            connection_string = connection_string.replace(
+                "your_password", self.config_manager.get_db_password()
+            )
+
             storage = ExternalSQLHandler(connection_string)
             memory = CustomLongTermMemory(storage)
+            logger.debug(f"Long term memory: {memory.__class__.__name__}")
             return memory
 
         if is_active and not is_external:
             # downstream sqlite storage
             logger.debug("Long term memory default configuration activated")
             return self.__init_default_long_term_memory()
-
-    # def get_crew_memory_config(self) -> Dict[str, Any]:
-    #     """Get comprehensive memory configuration for CrewAI crew"""
-    #     return {
-    #         "memory": True,
-    #         "long_term_memory": EnhanceLongTermMemory(
-    #             storage=LTMSQLiteStorage(
-    #                 db_path=f"{self.storage_path}/long_term_memory_storage.db"
-    #             )
-    #         ),
-    #         "short_term_memory": EnhanceShortTermMemory(
-    #             storage=CustomRAGStorage(
-    #                 crew_name="cognition",
-    #                 storage_type="short_term",
-    #                 data_dir=self.storage_path,
-    #                 model=self.embedder["model"],
-    #                 dimension=self.embedder["dimension"],
-    #             ),
-    #         ),
-    #         "entity_memory": EnhanceEntityMemory(
-    #             storage=CustomRAGStorage(
-    #                 crew_name="cognition",
-    #                 storage_type="entities",
-    #                 data_dir=self.storage_path,
-    #                 model=self.embedder["model"],
-    #                 dimension=self.embedder["dimension"],
-    #             ),
-    #         ),
-    #         "verbose": True,
-    #     }

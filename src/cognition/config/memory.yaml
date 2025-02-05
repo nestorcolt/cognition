@@ -7,4 +7,4 @@ embedder:
 long_term_memory:
   enabled: true
   external: true
-  connection_string: "postgresql://user:pass@host:5432/db"
+  connection_string: "postgresql://postgres:your_password@localhost:5432/cognition_db"

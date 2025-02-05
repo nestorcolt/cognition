@@ -1,5 +1,5 @@
 from crewai.memory.long_term.long_term_memory_item import LongTermMemoryItem
-from crewai.memory.memory import Memory
+from crewai.memory.long_term.long_term_memory import LongTermMemory
 from sqlalchemy import create_engine, text
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -38,28 +38,65 @@ class ExternalSQLHandler(BaseStorageHandler):
         self.pool = self.engine.pool
 
     def save(self, task_description: str, metadata: dict, datetime: str, score: float):
+        """Save memory to database"""
         with self.engine.connect() as conn:
+            # Convert Unix timestamp to proper datetime
+            timestamp = datetime if isinstance(datetime, str) else str(datetime)
+            formatted_datetime = text("to_timestamp(:dt)")
+
             conn.execute(
                 text(
                     """
                     INSERT INTO long_term_memories 
                     (task_description, metadata, datetime, score)
-                    VALUES (:task, :meta, :dt, :score)
-                """
+                    VALUES (:task, :meta, """
+                    + formatted_datetime.text
+                    + """, :score)
+                    """
                 ),
                 {
                     "task": task_description,
                     "meta": json.dumps(metadata),
-                    "dt": datetime,
+                    "dt": timestamp,
                     "score": score,
                 },
             )
             conn.commit()
 
+    def load(self, task_description: str, latest_n: int) -> List[Dict]:
+        """Load the latest n memories related to the task description"""
+        with self.engine.connect() as conn:
+            result = conn.execute(
+                text(
+                    """
+                    SELECT task_description, metadata, datetime, score
+                    FROM long_term_memories
+                    WHERE task_description LIKE :task
+                    ORDER BY datetime DESC
+                    LIMIT :n
+                    """
+                ),
+                {"task": f"%{task_description}%", "n": latest_n},
+            )
+
+            memories = []
+            for row in result:
+                memories.append(
+                    {
+                        "task": row.task_description,
+                        "metadata": json.loads(row.metadata),
+                        "datetime": row.datetime,
+                        "score": row.score,
+                    }
+                )
+
+            return memories
+
 
 # Step 3: Custom Long Term Memory
-class CustomLongTermMemory(Memory):
-    def __init__(self, storage: BaseStorageHandler):
+class CustomLongTermMemory(LongTermMemory):
+    def __init__(self, storage: BaseStorageHandler, *args, **kwargs):
+        super(CustomLongTermMemory, self).__init__(*args, **kwargs)
         self.storage = storage
         self.storage.connect()
 

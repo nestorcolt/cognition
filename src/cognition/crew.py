@@ -88,8 +88,8 @@ class Cognition:
             process=Process.sequential,
             memory=True,
             verbose=True,
-            # long_term_memory=self.memory_service.get_long_term_memory(),
+            long_term_memory=self.memory_service.get_long_term_memory(),
             embedder=self.memory_service.embedder,
         )
-        exit(0)
+        # exit(0)
         return crew
