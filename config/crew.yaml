@@ -1,5 +1,0 @@
-memory:
-  active_provider: "default"
-  providers:
-    - name: default
-      enabled: true

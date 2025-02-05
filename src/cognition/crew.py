@@ -1,10 +1,9 @@
-from cognition.svc.config_service import ConfigManager
-from cognition.svc.memory_service import MemoryService
+from cognition.service.config_service import ConfigManager
+from cognition.service.memory.mem_svc import MemoryService
 from crewai.project import CrewBase, agent, crew, task
 from crewai import Agent, Crew, Process, Task
 from cognition.llm import init_portkey_llm
 from pathlib import Path
-import os
 
 
 @CrewBase
@@ -26,6 +25,8 @@ class Cognition:
 
         # LLM GATEWAY CONFIG
         self.portkey_config = self.config_manager.get_portkey_config()
+
+        exit(0)
 
     @agent
     def researcher(self) -> Agent:

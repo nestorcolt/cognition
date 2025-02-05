@@ -1,8 +1,8 @@
-active_provider: "default"
+active_provider: "ollama"
 storage_path: "./data/memory"
 embedder:
   model: "nomic-embed-text"
-  dimension: 768
+  dimension: 384
 providers:
-  - name: default
+  - name: ollama
     enabled: true
