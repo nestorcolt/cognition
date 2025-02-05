@@ -1,5 +1,7 @@
+from cognition.service.memory.short_term import CustomShortTermMemory
 from crewai.memory.long_term.long_term_memory import LongTermMemory
 from cognition.service.memory.long_term import CustomLongTermMemory
+from cognition.service.memory.entity import CustomEntityMemory
 from cognition.service.config_service import ConfigManager
 from cognition import logger
 
@@ -81,3 +83,70 @@ class MemoryService:
             # downstream sqlite storage
             logger.debug("Long term memory default configuration activated")
             return self.__init_default_long_term_memory()
+
+    def get_short_term_memory(self):
+        """Get short term memory configuration"""
+        settings = self.memory_config.get("short_term_memory", {})
+
+        if settings is None:
+            logger.debug("Short term memory configuration deactivated")
+            return
+
+        is_active = settings.get("enabled", False)
+        is_external = settings.get("external", False)
+
+        if is_active and is_external:
+            host = settings.get("host")
+            port = settings.get("port")
+            collection_name = settings.get("collection_name", "short_term")
+
+            if not all([host, port]):
+                logger.error("Short term memory configuration incomplete")
+                return
+
+            memory = CustomShortTermMemory(
+                host=host,
+                port=port,
+                collection_name=collection_name,
+                embedder_config=self.get_embedder_config(),
+            )
+            logger.debug(f"Short term memory: {memory.__class__.__name__}")
+            return memory
+
+        return self.__init_default_short_term_memory()
+
+    def get_entity_memory(self):
+        """Get entity memory configuration"""
+        settings = self.memory_config.get("entity_memory", {})
+
+        if settings is None:
+            logger.debug("Entity memory configuration deactivated")
+            return
+
+        is_active = settings.get("enabled", False)
+        is_external = settings.get("external", False)
+
+        if is_active and is_external:
+            host = settings.get("host")
+            port = settings.get("port")
+            collection_name = settings.get("collection_name", "entities")
+
+            if not all([host, port]):
+                logger.error("Entity memory configuration incomplete")
+                return
+
+            memory = CustomEntityMemory(
+                host=host,
+                port=port,
+                collection_name=collection_name,
+                embedder_config=self.get_embedder_config(),
+            )
+            logger.debug(f"Entity memory: {memory.__class__.__name__}")
+            return memory
+
+        return self.__init_default_entity_memory()
+
+    def get_embedder_config(self):
+        """Get embedder configuration"""
+        embedder_settings = self.memory_config.get("embedder", {})
+        return embedder_settings

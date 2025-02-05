@@ -36,9 +36,15 @@ class ConfigManager:
         self._load_configs()
 
     def get_db_password(self) -> str:
-        password =   os.getenv("LONG_TERM_DB_PASSWORD")
+        password = os.getenv("LONG_TERM_DB_PASSWORD")
         if not password:
             raise ValueError("LONG_TERM_DB_PASSWORD environment variable is not set")
+        return password
+
+    def get_chroma_password(self) -> str:
+        password = os.getenv("CHROMA_PASSWORD")
+        if not password:
+            raise ValueError("CHROMA_PASSWORD environment variable is not set")
         return password
 
     def _setup_hot_reload(self):
