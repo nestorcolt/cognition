@@ -34,11 +34,13 @@ class MemoryService:
         """Initialize memory configuration"""
         self.memory_config = self.config_manager.get_memory_config()
         self.storage_path = self.config_manager.storage_dir
+        logger.debug(f"Memory Storage Path: {self.storage_path}")
 
         if self.memory_config is None:
             return
 
         self.embedder = self.memory_config.get("embedder", self.embedder)
+        logger.debug(f"Embedder: {self.embedder}")
 
     def __init_default_long_term_memory(self) -> LongTermMemory:
         """Initialize default long term memory configuration"""

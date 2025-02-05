@@ -1,11 +1,8 @@
-active_provider: "ollama"
-# storage_path: "./data/memory"
 embedder:
-  model: "nomic-embed-text"
-  dimension: 384
-providers:
-  - name: ollama
-    enabled: true
+  provider: "ollama"
+  config:
+    model: "nomic-embed-text"
+    dimension: 384
 
 long_term_memory:
   enabled: true
