@@ -4,6 +4,7 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai import Agent, Crew, Process, Task
 from cognition.llm import init_portkey_llm
 from pathlib import Path
+import os
 
 
 @CrewBase
@@ -86,12 +87,14 @@ class Cognition:
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
-            verbose=True,
             memory=True,
+            verbose=True,
             embedder={
-                "model": "nomic-embed-text",
                 "provider": "ollama",
-                "dimension": 768,
+                "config": {
+                    "model": "nomic-embed-text",
+                    "vector_dimension": 384,
+                },
             },
         )
 

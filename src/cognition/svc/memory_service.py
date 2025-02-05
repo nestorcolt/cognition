@@ -9,6 +9,7 @@ class MemoryService:
     def __init__(self, config_manager: ConfigManager):
         self.config_manager = config_manager
         self._initialize_config()
+        self.embedder = {}
 
     def _initialize_config(self):
         """Initialize memory configuration"""
@@ -16,11 +17,15 @@ class MemoryService:
         self.storage_path = self.memory_config.get("storage_path", "./data/memory")
 
         # Configure embeddings
-        self.embedder = {
-            "model": "nomic-embed-text",
-            "provider": "ollama",
-            "dimension": 768,
-        }
+        self.embedder = (
+            {
+                "provider": "ollama",
+                "config": {
+                    "model": "nomic-embed-text",
+                    "vector_dimension": 384,
+                },
+            },
+        )
 
     # def get_crew_memory_config(self) -> Dict[str, Any]:
     #     """Get comprehensive memory configuration for CrewAI crew"""
