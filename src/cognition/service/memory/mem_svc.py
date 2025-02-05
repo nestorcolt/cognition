@@ -3,7 +3,7 @@ from crewai.memory.long_term.long_term_memory import LongTermMemory
 from cognition.service.config_service import ConfigManager
 from cognition import logger
 
-logger = logger.getChild(__name__)
+logger = logger.logger.getChild(__name__)
 
 
 class MemoryService:

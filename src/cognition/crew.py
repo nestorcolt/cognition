@@ -90,6 +90,7 @@ class Cognition:
             process=Process.sequential,
             memory=True,
             verbose=True,
+            long_term_memory=self.memory_service.get_long_term_memory(),
             embedder={
                 "provider": "ollama",
                 "config": {
@@ -98,5 +99,5 @@ class Cognition:
                 },
             },
         )
-
+        exit(0)
         return crew
