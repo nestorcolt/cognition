@@ -1,5 +1,5 @@
 active_provider: "ollama"
-storage_path: "./data/memory"
+# storage_path: "./data/memory"
 embedder:
   model: "nomic-embed-text"
   dimension: 384
