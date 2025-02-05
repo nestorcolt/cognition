@@ -11,6 +11,10 @@ class MemoryService:
         self._initialize_config()
         self.embedder = {}
 
+    def get_storage_path(self) -> str:
+        """Get the storage path for memory data"""
+        return self.storage_path
+
     def _initialize_config(self):
         """Initialize memory configuration"""
         self.memory_config = self.config_manager.get_memory_config()
@@ -56,7 +60,3 @@ class MemoryService:
     #         ),
     #         "verbose": True,
     #     }
-
-    def get_storage_path(self) -> str:
-        """Get the storage path for memory data"""
-        return self.storage_path
