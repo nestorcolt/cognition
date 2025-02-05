@@ -6,3 +6,8 @@ embedder:
 providers:
   - name: ollama
     enabled: true
+
+long_term_memory:
+  enabled: true
+  external: true
+  connection_string: "postgresql://user:pass@host:5432/db"
