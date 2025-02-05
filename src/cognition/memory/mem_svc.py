@@ -1,8 +1,8 @@
-from cognition.service.memory.short_term import CustomShortTermMemory
+from cognition.memory.short_term import CustomShortTermMemory
 from crewai.memory.long_term.long_term_memory import LongTermMemory
-from cognition.service.memory.long_term import CustomLongTermMemory
-from cognition.service.memory.entity import CustomEntityMemory
-from cognition.service.config_service import ConfigManager
+from cognition.memory.long_term import CustomLongTermMemory
+from cognition.memory.entity import CustomEntityMemory
+from cognition.config import ConfigManager
 from cognition import logger
 
 logger = logger.logger.getChild(__name__)

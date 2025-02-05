@@ -6,10 +6,10 @@ from contextlib import contextmanager
 from typing import Dict, Any, Type
 from cognition.logger import logger
 from pathlib import Path
-import yaml
-import os
-import time
 import threading
+import yaml
+import time
+import os
 
 
 class ConfigValidationError(Exception):

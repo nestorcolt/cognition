@@ -1,8 +1,8 @@
-from cognition.service.config_service import ConfigManager
-from cognition.service.memory.mem_svc import MemoryService
 from crewai.project import CrewBase, agent, crew, task
+from cognition.memory.mem_svc import MemoryService
 from crewai import Agent, Crew, Process, Task
 from cognition.llm import init_portkey_llm
+from cognition.config import ConfigManager
 from pathlib import Path
 
 

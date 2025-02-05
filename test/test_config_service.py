@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from pydantic import BaseModel
-from cognition.service.config_service import (
+from cognition.config import (
     ConfigManager,
     ConfigValidationError,
     ConfigSchema,

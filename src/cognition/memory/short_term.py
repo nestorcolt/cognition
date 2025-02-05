@@ -1,8 +1,8 @@
-from crewai.memory.entity.entity_memory import EntityMemory
-from cognition.service.memory.storage import ChromaRAGStorage
+from crewai.memory.short_term.short_term_memory import ShortTermMemory
+from cognition.memory.storage import ChromaRAGStorage
 
 
-class CustomEntityMemory(EntityMemory):
+class CustomShortTermMemory(ShortTermMemory):
     def __init__(
         self, host: str, port: int, collection_name: str, embedder_config=None
     ):
