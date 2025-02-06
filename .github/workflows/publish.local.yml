@@ -43,3 +43,8 @@ jobs:
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Add these for better debugging
+          no-cache: true
+          load: true
+          provenance: false
+          outputs: type=docker

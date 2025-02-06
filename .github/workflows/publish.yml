@@ -53,7 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # First, we need to ensure Docker Hub login works
+      # Login to Docker Hub only when publishing
       - name: Login to Docker Hub
         if: startsWith(github.ref, 'refs/tags/v')
         uses: docker/login-action@v3
@@ -61,21 +61,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Then the metadata action that's causing issues
-      - name: Docker meta
+      # Modified metadata step that works both locally and in production
+      - name: Set Docker tags
         id: meta
-        uses: docker/metadata-action@v5
-        with:
-          # Use a conditional to set the image name
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/cognition
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
+        run: |
+          if [[ $GITHUB_REF == refs/tags/v* ]]; then
+            # For version tags
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "tags=${{ secrets.DOCKERHUB_USERNAME }}/cognition:latest,${{ secrets.DOCKERHUB_USERNAME }}/cognition:${VERSION}" >> $GITHUB_OUTPUT
+          else
+            # For non-tag builds (local or PR)
+            echo "tags=test-image:latest" >> $GITHUB_OUTPUT
+          fi
+          echo "labels=org.opencontainers.image.version=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -89,6 +87,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Added for better debugging and local builds
+          load: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+          no-cache: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+          provenance: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          outputs: type=docker
 
   notify:
     needs: [build-and-test, docker]
