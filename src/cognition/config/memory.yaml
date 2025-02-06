@@ -5,19 +5,19 @@ embedder:
     dimension: 384
 
 long_term_memory:
-  enabled: true
+  enabled: false
   external: true
   connection_string: "postgresql://postgres:your_password@localhost:5432/cognition_db"
 
 short_term_memory:
-  enabled: true
+  enabled: false
   external: true
   host: "localhost"
   port: 8000
   collection_name: "short_term"
 
 entity_memory:
-  enabled: true
+  enabled: false
   external: true
   host: "localhost"
   port: 8000
