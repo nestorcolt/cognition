@@ -67,7 +67,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # Use a conditional to set the image name
-          images: ${{ github.event_name == 'pull_request' && 'cognition' || format('docker.io/{0}/cognition', secrets.DOCKERHUB_USERNAME) }}
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/cognition
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=branch
