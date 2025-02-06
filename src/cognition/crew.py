@@ -7,8 +7,8 @@ from crewai.project import agent, crew, task
 class Cognition(CognitionCoreCrewBase):
     """Cognition crew"""
 
-    def __init__(self):
-        super(Cognition).__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @agent
     def researcher(self) -> Agent:

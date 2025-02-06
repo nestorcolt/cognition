@@ -23,8 +23,7 @@ def run():
     }
     
     try:
-        # Cognition().crew().kickoff(inputs=inputs)
-        Cognition()
+        Cognition().crew().kickoff(inputs=inputs)
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
 
