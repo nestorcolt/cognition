@@ -27,3 +27,6 @@ type = "crew"
 
 [tool.setuptools.dynamic]
 version = { attr = "cognition.__version__" }
+
+[tool.hatch.version]
+path = "cognition/__init__.py"
