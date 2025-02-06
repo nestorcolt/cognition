@@ -1,5 +1,6 @@
 from cognition_api.routes.agent import set_agent_handler
 from cognition_api.models import AgentRequest
+from cognition.crew import Cognition
 
 
 async def my_agent_handler(request: AgentRequest):
