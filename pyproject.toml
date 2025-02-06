@@ -8,11 +8,12 @@ dependencies = [
     "crewai[tools]>=0.100.1,<1.0.0",
     "langchain-community>=0.0.27",
     "chromadb>=0.4.0",
+    "cognition-core",
 ]
 
 [project.optional-dependencies]
 # Add any git dependencies here
-dev = ["package-name @ git@github.com:nestorcolt/cognition-core.git"]
+dev = []
 
 [project.scripts]
 cognition = "cognition.main:run"
