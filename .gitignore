@@ -106,3 +106,5 @@ coverage.xml
 cognition-ai - material/
 uv.lock
 report.md
+.secrets
+/bin
