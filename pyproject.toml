@@ -1,8 +1,8 @@
 [project]
 name = "cognition"
 dynamic = ["version"]
-description = "cognition using crewAI"
-authors = [{ name = "Your Name", email = "you@example.com" }]
+description = "Wrapper agent for crewai - Enables dynamic tooling, configuration, and more"
+authors = [{ name = "Nestor Colt", email = "nestor.colt@gmail.com" }]
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "crewai[tools]>=0.100.1,<1.0.0",
