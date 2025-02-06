@@ -108,3 +108,7 @@ uv.lock
 report.md
 .secrets
 /bin
+# Draw.io backups
+*.drawio.bkp
+*cognition-ai.drawio.bkp*
+*.bkp
