@@ -1,6 +1,8 @@
-from cognition_api.service import create_app, CrewAIBackend
-from cognition.crew import Cognition
+from cognition_api.service import CrewAIBackend
 from fastapi import APIRouter, Request
+from cognition.crew import Cognition
+from cognition_api.main import app  # Import the base app from cognition-api!
+from datetime import datetime
 from typing import Dict, Any
 
 # Create router for our endpoints
@@ -13,6 +15,14 @@ class CognitionBackend(CrewAIBackend):
         self.cognition = Cognition()
 
     async def run_task(self, task: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        print(f"Running task: {task} with inputs: {inputs}")
+        # TODO: Remove this once we have a proper way to handle inputs
+        # Ensure required inputs are present
+        if "topic" not in inputs:
+            inputs["topic"] = inputs.get("query", "AI LLMs")  # fallback value
+        if "current_year" not in inputs:
+            inputs["current_year"] = str(datetime.now().year)
+
         crew = self.cognition.crew()
         result = crew.kickoff(inputs=inputs)
         return {"task": task, "result": result}
@@ -28,8 +38,8 @@ async def run_agent(request: Request):
     return result
 
 
-# Create base app with our backend
-app = create_app(agent_backend=CognitionBackend())
+# Configure the backend
+app.state.agent_backend = CognitionBackend()
 
 # Include our routes - add a print to verify registration
 print("Registering routes at /v1/agent")
