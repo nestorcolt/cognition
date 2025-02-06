@@ -33,7 +33,10 @@ type = "crew"
 version = { attr = "cognition.__version__" }
 
 [tool.hatch.version]
-path = "src/cognition/__init__.py" 
+path = "src/cognition/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cognition"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
