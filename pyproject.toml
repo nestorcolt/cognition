@@ -33,7 +33,7 @@ type = "crew"
 version = { attr = "cognition.__version__" }
 
 [tool.hatch.version]
-path = "cognition/__init__.py"
+path = "src/cognition/__init__.py"  # Updated to match your actual path
 
 [tool.hatch.metadata]
 allow-direct-references = true
