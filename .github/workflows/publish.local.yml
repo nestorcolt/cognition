@@ -1,0 +1,45 @@
+name: Build and Publish Package
+
+on: push
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine pytest hatchling
+      - name: Build package
+        run: python -m build
+      - name: Check package
+        run: twine check dist/*
+
+  docker:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Simplified metadata step for local testing
+      - name: Set Docker tags
+        id: meta
+        run: |
+          echo "tags=test-image:latest" >> $GITHUB_OUTPUT
+          echo "labels=org.opencontainers.image.version=test" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
