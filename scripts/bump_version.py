@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def bump_version(version_type):
-    init_file = Path("cognition/__init__.py")
+    init_file = Path("src/cognition/__init__.py")
     content = init_file.read_text()
 
     # Extract current version
