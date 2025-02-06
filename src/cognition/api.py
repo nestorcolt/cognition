@@ -1,9 +1,22 @@
-from cognition_api.service import CrewAIBackend
+from cognition_api.service import create_app, CrewAIBackend
 from fastapi import APIRouter, Request
 from cognition.crew import Cognition
-from cognition_api.main import app  # Import the base app from cognition-api!
+from cognition_api.main import app
 from datetime import datetime
 from typing import Dict, Any
+from pydantic import BaseModel
+
+
+# Create request/response models
+class AgentRequest(BaseModel):
+    topic: str = "AI LLMs"
+    current_year: str = str(datetime.now().year)
+
+
+class AgentResponse(BaseModel):
+    task: str
+    result: Any
+
 
 # Create router for our endpoints
 router = APIRouter()
@@ -15,31 +28,24 @@ class CognitionBackend(CrewAIBackend):
         self.cognition = Cognition()
 
     async def run_task(self, task: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        print(f"Running task: {task} with inputs: {inputs}")
-        # TODO: Remove this once we have a proper way to handle inputs
-        # Ensure required inputs are present
-        if "topic" not in inputs:
-            inputs["topic"] = inputs.get("query", "AI LLMs")  # fallback value
-        if "current_year" not in inputs:
-            inputs["current_year"] = str(datetime.now().year)
-
+        print(f"DEBUG: Inside run_task with inputs: {inputs}")
         crew = self.cognition.crew()
         result = crew.kickoff(inputs=inputs)
+        print(f"DEBUG: Crew result: {result}")
         return {"task": task, "result": result}
 
 
 # Add your specific routes
-@router.post("/run")
-async def run_agent(request: Request):
+@router.post("/run", response_model=AgentResponse)
+async def run_agent(request: Request, agent_request: AgentRequest):
     """Direct endpoint for running the Cognition agent"""
-    data = await request.json()
     backend = request.app.state.agent_backend
-    result = await backend.run_task(task="direct_run", inputs=data)
+    result = await backend.run_task(task="direct_run", inputs=agent_request.dict())
     return result
 
 
-# Configure the backend
-app.state.agent_backend = CognitionBackend()
+# Create the app with your backend
+app = create_app(agent_backend=CognitionBackend())
 
 # Include our routes - add a print to verify registration
 print("Registering routes at /v1/agent")
