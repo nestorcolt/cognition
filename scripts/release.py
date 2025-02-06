@@ -1,3 +1,23 @@
+"""
+
+# Make sure you're on main branch and everything is committed
+git checkout main
+git pull origin main
+
+# Run the release script for your first version (0.1.0)
+python scripts/release.py minor
+
+# This will:
+# 1. Check you're on main branch
+# 2. Check working directory is clean
+# 3. Pull latest changes
+# 4. Bump version (using bump_version.py)
+# 5. Commit the changes
+# 6. Create an annotated tag
+# 7. Push everything to GitHub
+
+"""
+
 import subprocess
 import sys
 from bump_version import bump_version
