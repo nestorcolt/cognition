@@ -13,14 +13,12 @@ tool_services:
       - path: "/tools/{tool_id}"
         method: "GET"
         description: "Fetches specific tool details"
-    headers:
-      Authorization: "${TOOL_SERVICE_API_KEY}"
 
   - name: "secondary_service"
     enabled: false
     base_url: "http://other-service:9090/api/v1"
     endpoints:
-      - path: "/available-tools"
+      - path: "/tools"
         method: "GET"
         description: "Fetches available tools"
 
