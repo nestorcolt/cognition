@@ -1,10 +1,13 @@
 from cognition_api.service import create_app, CrewAIBackend
+from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, Request
 from cognition.crew import Cognition
 from cognition_api.main import app
 from datetime import datetime
 from typing import Dict, Any
 from pydantic import BaseModel
+import asyncio
+import uuid
 
 
 # Create request/response models
@@ -14,8 +17,9 @@ class AgentRequest(BaseModel):
 
 
 class AgentResponse(BaseModel):
-    task: str
-    result: Any
+    task_id: str
+    status: str
+    message: str
 
 
 # Create router for our endpoints
@@ -26,14 +30,46 @@ router = APIRouter()
 class CognitionBackend(CrewAIBackend):
     def __init__(self):
         self.cognition = Cognition()
+        self.tasks = {}  # In-memory storage
+        self.executor = ThreadPoolExecutor()
 
     async def run_task(self, task: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        print(f"DEBUG: Inside run_task with inputs: {inputs}")
-        crew = self.cognition.crew()
-        result = crew.kickoff(inputs=inputs)
-        print(f"DEBUG: Crew result: {result}")
-        return {"task": task, "result": result}
+        task_id = str(uuid.uuid4())
 
+        # Start task in background
+        asyncio.create_task(self._process_task(task_id, inputs))
+
+        # Return immediately
+        return {
+            "task_id": task_id,
+            "status": "processing",
+            "message": "Task started successfully",
+        }
+
+    @staticmethod
+    def task_completed_callback(task_id, result):
+        print(f"Task {task_id} completed with result: {result}")
+        """
+        
+        I need to send to an external queue - 
+        - the task_id
+        - the result
+        - the input
+        
+        also need to make and internal queu or store the task id so I can ask the agent
+        about the task results in a different message.
+        """
+
+    async def _process_task(self, task_id: str, inputs: Dict):
+        try:
+            result = await asyncio.get_event_loop().run_in_executor(
+                self.executor, lambda: self.cognition.crew().kickoff(inputs=inputs)
+            )
+            self.tasks[task_id] = {"status": "completed", "result": result}
+            self.task_completed_callback(task_id, result)
+        except Exception as e:
+            self.tasks[task_id] = {"status": "failed", "error": str(e)}
+            print(f"Task {task_id} failed with error: {e}")
 
 # Add your specific routes
 @router.post("/run", response_model=AgentResponse)
