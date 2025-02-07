@@ -123,4 +123,47 @@ The architecture supports a clean development workflow:
 2. Testing with cloud resources
 3. Production deployment with full cloud integration
 
-This breakdown shows how each component serves a specific purpose while maintaining simplicity and scalability. The architecture successfully balances the use of CrewAI's native capabilities with custom extensions where needed.
+## Docker Image Creation
+
+To build and run the Docker image for the Cognition API, follow these steps:
+
+1. **Build the Docker Image**:
+   ```bash
+   docker build -t cognition .
+   ```
+
+2. **Run the Docker Container**:
+   ```bash
+   docker run -p 8000:8000 cognition
+   ```
+
+This will start the Cognition API on port 8000.
+
+## Environment Variables
+
+The following environment variables can be configured for the Cognition API. They are optional, except for `PORTKEY_API_KEY` and `PORTKEY_VIRTUAL_KEY`, which are required:
+
+- `ANTHROPIC_API_KEY`: Optional API key for Anthropic services.
+- `HUGGINGFACE_API_TOKEN`: Optional token for Hugging Face services.
+- `PORTKEY_API_KEY`: **Required** API key for Portkey integration.
+- `PORTKEY_VIRTUAL_KEY`: Optional virtual key for Portkey.
+- `LONG_TERM_DB_PASSWORD`: Optional password for long-term database access.
+- `APP_LOG_LEVEL`: Optional log level for the application (default: DEBUG).
+- `CHROMA_PASSWORD`: Optional password for Chroma services.
+
+These variables can be set in the Docker container using the `-e` flag or in a `.env` file if needed.
+
+## API Enhancements
+
+The Cognition API now supports asynchronous task processing, allowing for non-blocking operations and improved scalability. Key features include:
+
+- **Asynchronous Task Execution**: Tasks are processed in the background, enabling immediate API responses.
+- **Task Status Tracking**: Check the status of tasks using the `/status/{task_id}` endpoint.
+- **Integration with AWS SQS**: Optionally send task results to an external queue for persistence and further processing.
+
+## Docker Hub
+
+The Docker image for the Cognition API is available on Docker Hub. You can pull the latest image using:
+   ```bash
+   docker pull nestorcolt/cognition:latest
+   ```
