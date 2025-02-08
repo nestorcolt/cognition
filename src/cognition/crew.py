@@ -37,8 +37,8 @@ class Cognition(CognitionCoreCrewBase):
             config=self.agents_config["researcher"],
             llm=llm,
             verbose=True,
-            tool_names=self.list_tools(),  # Pass tool names
-            tool_service=self.tool_service,  # Pass tool service
+            tools=self.list_tools(),  # Changed from tool_names to tools
+            tool_service=self.tool_service,
         )
         return agent
 
@@ -51,9 +51,13 @@ class Cognition(CognitionCoreCrewBase):
             model=raw_config["llm"],
             portkey_config=self.portkey_config,
         )
-        # Pass file path to Agent for CrewAI's config loading
+
         agent = CognitionAgent(
-            config=self.agents_config["reporting_analyst"], llm=llm, verbose=True
+            config=self.agents_config["reporting_analyst"],
+            llm=llm,
+            verbose=True,
+            tools=self.list_tools(),  # Added tools
+            tool_service=self.tool_service,  # Added tool service
         )
         return agent
 
