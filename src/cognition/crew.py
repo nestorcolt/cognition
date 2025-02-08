@@ -24,42 +24,25 @@ class Cognition(CognitionCoreCrewBase):
 
     @agent
     def researcher(self) -> CognitionAgent:
-        # Get raw config for LLM initialization
-        raw_config = self.config_manager.get_config("agents")["researcher"]
-        # Initialize LLM with config settings and portkey config
         llm = init_portkey_llm(
-            model=raw_config["llm"],
+            model=self.agents_config["researcher"]["llm"],
             portkey_config=self.portkey_config,
         )
 
-        # Create CognitionAgent with tool service
-        agent = CognitionAgent(
-            config=self.agents_config["researcher"],
-            llm=llm,
-            verbose=True,
-            tools=self.list_tools(),  # Changed from tool_names to tools
-            tool_service=self.tool_service,
+        return self.get_cognition_agent(
+            config=self.agents_config["researcher"], llm=llm
         )
-        return agent
 
     @agent
     def reporting_analyst(self) -> CognitionAgent:
-        # Get raw config for LLM initialization
-        raw_config = self.config_manager.get_config("agents")["reporting_analyst"]
-        # Initialize LLM with config settings and portkey config
         llm = init_portkey_llm(
-            model=raw_config["llm"],
+            model=self.agents_config["reporting_analyst"]["llm"],
             portkey_config=self.portkey_config,
         )
 
-        agent = CognitionAgent(
-            config=self.agents_config["reporting_analyst"],
-            llm=llm,
-            verbose=True,
-            tools=self.list_tools(),  # Added tools
-            tool_service=self.tool_service,  # Added tool service
+        return self.get_cognition_agent(
+            config=self.agents_config["reporting_analyst"], llm=llm
         )
-        return agent
 
     @task
     def research_task(self) -> CognitionTask:
