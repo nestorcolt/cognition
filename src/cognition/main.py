@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from cognition.crew import Cognition
 from datetime import datetime
+import asyncio
 import warnings
 import sys
 
@@ -13,14 +14,16 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # interpolate any tasks and agents information
 
 
-def run():
-    """
-    Run the crew.
-    """
+async def run():
+    """Run the crew asynchronously."""
     inputs = {"topic": "AI LLMs", "current_year": str(datetime.now().year)}
 
     try:
-        Cognition().crew().kickoff(inputs=inputs)
+        cognition = Cognition()
+        await cognition.setup()  # Setup tools and services
+        crew = cognition.crew()
+        result = await crew.kickoff_async(inputs=inputs)  # Use built-in async support
+        return result
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
 
@@ -65,4 +68,5 @@ def test():
 
 
 if __name__ == "__main__":
-    run()
+    result = asyncio.run(run())
+    print(f"Result: {result}")
