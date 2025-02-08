@@ -1,7 +1,11 @@
 from crewai.project import agent, crew, task, CrewBase
 from cognition_core.crew import CognitionCoreCrewBase
+from cognition_core.agent import CognitionAgent
+from cognition_core.task import CognitionTask
+from cognition_core.crew import CognitionCrew
 from cognition_core.llm import init_portkey_llm
-from crewai import Agent, Crew, Process, Task
+from crewai import Process
+import asyncio
 
 
 @CrewBase
@@ -10,9 +14,16 @@ class Cognition(CognitionCoreCrewBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._initialized = False
+
+    async def setup(self):
+        """Ensure services are initialized"""
+        if not self._initialized:
+            await super().setup()
+            self._initialized = True
 
     @agent
-    def researcher(self) -> Agent:
+    def researcher(self) -> CognitionAgent:
         # Get raw config for LLM initialization
         raw_config = self.config_manager.get_config("agents")["researcher"]
         # Initialize LLM with config settings and portkey config
@@ -20,12 +31,19 @@ class Cognition(CognitionCoreCrewBase):
             model=raw_config["llm"],
             portkey_config=self.portkey_config,
         )
-        # Pass file path to Agent for CrewAI's config loading
-        agent = Agent(config=self.agents_config["researcher"], llm=llm, verbose=True)
+
+        # Create CognitionAgent with tool service
+        agent = CognitionAgent(
+            config=self.agents_config["researcher"],
+            llm=llm,
+            verbose=True,
+            tool_names=self.list_tools(),  # Pass tool names
+            tool_service=self.tool_service,  # Pass tool service
+        )
         return agent
 
     @agent
-    def reporting_analyst(self) -> Agent:
+    def reporting_analyst(self) -> CognitionAgent:
         # Get raw config for LLM initialization
         raw_config = self.config_manager.get_config("agents")["reporting_analyst"]
         # Initialize LLM with config settings and portkey config
@@ -34,14 +52,19 @@ class Cognition(CognitionCoreCrewBase):
             portkey_config=self.portkey_config,
         )
         # Pass file path to Agent for CrewAI's config loading
-        agent = Agent(
+        agent = CognitionAgent(
             config=self.agents_config["reporting_analyst"], llm=llm, verbose=True
         )
         return agent
 
     @task
-    def research_task(self) -> Task:
-        task = Task(config=self.tasks_config["research_task"])
+    def research_task(self) -> CognitionTask:
+        # Create CognitionTask with tool service
+        task = CognitionTask(
+            config=self.tasks_config["research_task"],
+            tool_names=self.list_tools(),  # Pass tool names
+            tool_service=self.tool_service,  # Pass tool service
+        )
 
         # Print all properties of the task
         # for key, value in vars(task).items():
@@ -54,8 +77,10 @@ class Cognition(CognitionCoreCrewBase):
         return f"Searching the web for {query}"
 
     @task
-    def reporting_task(self) -> Task:
-        task = Task(config=self.tasks_config["reporting_task"], output_file="report.md")
+    def reporting_task(self) -> CognitionTask:
+        task = CognitionTask(
+            config=self.tasks_config["reporting_task"], output_file="report.md"
+        )
 
         # Print all properties of the task
         # for key, value in vars(task).items():
@@ -65,14 +90,18 @@ class Cognition(CognitionCoreCrewBase):
         return task
 
     @crew
-    def crew(self) -> Crew:
-        """Creates the Cognition crew"""
-        crew = Crew(
+    def crew(self) -> CognitionCrew:
+        """Creates the Cognition crew with tool integration"""
+        if not self._initialized:
+            asyncio.create_task(self.setup())
+
+        crew = CognitionCrew(
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
             memory=True,
             verbose=True,
+            tool_service=self.tool_service,  # Pass tool service to CognitionCrew
             short_term_memory=self.memory_service.get_short_term_memory(),
             entity_memory=self.memory_service.get_entity_memory(),
             long_term_memory=self.memory_service.get_long_term_memory(),
