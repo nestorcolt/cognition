@@ -22,8 +22,21 @@ async def run():
         cognition = Cognition()
         await cognition.setup()  # Setup tools and services
         crew = cognition.crew()
-        result = await crew.kickoff_async(inputs=inputs)  # Use built-in async support
+
+        # Debug information before execution
+        print("\nCrew Configuration:")
+        print(
+            f"Available Tools: {crew.tools_handler.get_tools(crew.tool_service.list_tools()) if crew.tools_handler else 'No tools'}"
+        )
+
+        for agent in crew.agents:
+            print(f"\nAgent: {agent.role}")
+            print(f"Tools assigned: {agent.tools}")
+            print(f"Tool names: {agent.tool_names}")
+
+        result = await crew.kickoff_async(inputs=inputs)
         return result
+
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
 
