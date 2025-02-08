@@ -1,15 +1,14 @@
-from crewai.project import agent, crew, task, CrewBase
 from cognition_core.crew import CognitionCoreCrewBase
 from cognition_core.llm import init_portkey_llm
 from cognition_core.agent import CognitionAgent
 from cognition_core.task import CognitionTask
 from cognition_core.crew import CognitionCrew
+from crewai.project import agent, crew, task
 from crewai import Process
 
 
-@CrewBase
-class Cognition(CognitionCoreCrewBase):
-    """Cognition crew"""
+@CognitionCoreCrewBase
+class Cognition:
 
     @agent
     def researcher(self) -> CognitionAgent:
