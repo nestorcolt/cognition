@@ -69,5 +69,5 @@ def test():
 
 
 if __name__ == "__main__":
-    result = run()  # No asyncio.run needed here
+    result = run()
     print(f"Result: {result}")
