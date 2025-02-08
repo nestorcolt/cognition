@@ -14,13 +14,14 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 # interpolate any tasks and agents information
 
 
-async def run():
-    """Run the crew asynchronously."""
+def run():
+    """Run the crew."""
     inputs = {"topic": "AI LLMs", "current_year": str(datetime.now().year)}
 
     try:
         cognition = Cognition()
-        await cognition.setup()  # Setup tools and services
+        # Use asyncio.run for setup
+        asyncio.run(cognition.setup())
         crew = cognition.crew()
 
         # Debug information before execution
@@ -34,7 +35,8 @@ async def run():
             print(f"Tools assigned: {agent.tools}")
             print(f"Tool names: {agent.tool_names}")
 
-        result = await crew.kickoff_async(inputs=inputs)
+        # Use kickoff (not kickoff_async) as it handles the async internally
+        result = crew.kickoff(inputs=inputs)
         return result
 
     except Exception as e:
@@ -81,5 +83,5 @@ def test():
 
 
 if __name__ == "__main__":
-    result = asyncio.run(run())
+    result = run()  # No asyncio.run needed here
     print(f"Result: {result}")
