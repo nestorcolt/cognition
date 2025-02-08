@@ -5,22 +5,9 @@ environment: "development"
 tool_services:
   - name: "primary_service"
     enabled: true
-    base_url: "http://localhost:8080/api/v1"
+    base_url: "http://localhost:8000"
     endpoints:
       - path: "/tools"
-        method: "GET"
-        description: "Fetches available tools"
-      - path: "/tools/{tool_id}"
-        method: "GET"
-        description: "Fetches specific tool details"
-    headers:
-      Authorization: "${TOOL_SERVICE_API_KEY}"
-
-  - name: "secondary_service"
-    enabled: false
-    base_url: "http://other-service:9090/api/v1"
-    endpoints:
-      - path: "/available-tools"
         method: "GET"
         description: "Fetches available tools"
 
