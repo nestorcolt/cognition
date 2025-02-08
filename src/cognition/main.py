@@ -70,4 +70,3 @@ def test():
 
 if __name__ == "__main__":
     result = run()
-    print(f"Result: {result}")
