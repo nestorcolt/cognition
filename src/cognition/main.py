@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from cognition.crew import Cognition
 from datetime import datetime
-import asyncio
 import warnings
 import sys
 
@@ -20,20 +19,7 @@ def run():
 
     try:
         cognition = Cognition()
-        # Use asyncio.run for setup
-        asyncio.run(cognition.setup())
         crew = cognition.crew()
-
-        # Debug information before execution
-        print("\nCrew Configuration:")
-        print(
-            f"Available Tools: {crew.tools_handler.get_tools(crew.tool_service.list_tools()) if crew.tools_handler else 'No tools'}"
-        )
-
-        for agent in crew.agents:
-            print(f"\nAgent: {agent.role}")
-            print(f"Tools assigned: {agent.tools}")
-            print(f"Tool names: {agent.tool_names}")
 
         # Use kickoff (not kickoff_async) as it handles the async internally
         result = crew.kickoff(inputs=inputs)
