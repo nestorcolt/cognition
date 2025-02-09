@@ -196,6 +196,7 @@ The following environment variables can be configured for the Cognition API. The
 - `LONG_TERM_DB_PASSWORD`: Optional password for long-term database access.
 - `APP_LOG_LEVEL`: Optional log level for the application (default: DEBUG).
 - `CHROMA_PASSWORD`: Optional password for Chroma services.
+- `COGNITION_CONFIG_DIR`: Optional path to the Cognition configuration directory.
 
 These variables can be set in the Docker container using the `-e` flag or in a `.env` file if needed.
 
