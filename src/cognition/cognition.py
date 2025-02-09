@@ -1,5 +1,5 @@
+import asyncio
 from cognition_core.crew import CognitionCoreCrewBase
-from cognition_core.base import CognitionComponent
 from cognition_core.llm import init_portkey_llm
 from cognition_core.agent import CognitionAgent
 from cognition_core.task import CognitionTask
@@ -14,15 +14,61 @@ class Cognition:
     """Base Cognition implementation - Virtual Interface"""
 
     def __init__(self):
+        # Initialize empty components first
+        self.available_components = {"agents": [], "tasks": []}
+        # Call parent so CrewBase processes @agent/@task decorators
         super().__init__()
+        # Try deferring the update until an event loop is available
+        try:
+            loop = asyncio.get_running_loop()
+            loop.call_soon(self._update_components)
+        except RuntimeError:
+            # No running loop - update components immediately
+            self._update_components()
+
+    def _update_components(self) -> None:
+        """Safely update available components after initialization"""
+        agents = getattr(self, "agents", [])
+        tasks = getattr(self, "tasks", [])
         self.available_components = {
-            "agents": [a for a in self.agents if a.is_available],
-            "tasks": [t for t in self.tasks if t.is_available],
+            "agents": [a for a in agents if a.is_available],
+            "tasks": [t for t in tasks if t.is_available],
         }
 
+    def activate_component(self, component_type: str, name: str) -> bool:
+        """Activate a specific component"""
+        if component_type in self.available_components:
+            for component in self.available_components[component_type]:
+                if component.name == name:
+                    component.enabled = True
+                    return True
+        return False
+
+    def deactivate_component(self, component_type: str, name: str) -> bool:
+        """Deactivate a specific component"""
+        if component_type in self.available_components:
+            for component in self.available_components[component_type]:
+                if component.name == name:
+                    component.enabled = False
+                    return True
+        return False
+
+    def get_active_workflow(self) -> Dict[str, List[str]]:
+        """Get currently active workflow components"""
+        return {
+            "agents": [a.name for a in self.available_components["agents"]],
+            "tasks": [t.name for t in self.available_components["tasks"]],
+        }
+
+    # Public kickoff method: delegate to the crew's public kickoff method
+    def kickoff(self, inputs=None):
+        """Kick off the crew execution using the crew's kickoff method."""
+        crew_obj = self.crew()  # Get the crew
+        return crew_obj.kickoff(inputs)  # Use the public 'kickoff' method
+
+    # Agent definitions
     @agent
     def manager(self) -> CognitionAgent:
-        """Initialize the manager agent"""
         llm = init_portkey_llm(
             model=self.agents_config["manager"]["llm"],
             portkey_config=self.portkey_config,
@@ -39,46 +85,6 @@ class Cognition:
             config=self.agents_config["researcher"], llm=llm
         )
 
-    def _discover_components(self) -> Dict[str, List[CognitionComponent]]:
-        """Discover all available components"""
-        return {
-            "agents": self.get_available_agents(),
-            "tasks": self.get_available_tasks(),
-        }
-
-    def activate_component(self, component_type: str, name: str):
-        """Activate a specific component"""
-        if component_type in self.available_components:
-            for component in self.available_components[component_type]:
-                if component.name == name:
-                    component.enabled = True
-                    return True
-        return False
-
-    def deactivate_component(self, component_type: str, name: str):
-        """Deactivate a specific component"""
-        if component_type in self.available_components:
-            for component in self.available_components[component_type]:
-                if component.name == name:
-                    component.enabled = False
-                    return True
-        return False
-
-    def register_agent(self, agent: CognitionAgent):
-        """Register a new agent"""
-        self.available_components["agents"].append(agent)
-
-    def register_task(self, task: CognitionTask):
-        """Register a new task"""
-        self.available_components["tasks"].append(task)
-
-    def get_active_workflow(self) -> Dict[str, List[str]]:
-        """Get currently active workflow components"""
-        return {
-            "agents": [a.name for a in self.get_available_agents()],
-            "tasks": [t.name for t in self.get_available_tasks()],
-        }
-
     @agent
     def reporting_analyst(self) -> CognitionAgent:
         llm = init_portkey_llm(
@@ -89,6 +95,7 @@ class Cognition:
             config=self.agents_config["reporting_analyst"], llm=llm
         )
 
+    # Task definitions
     @task
     def research_task(self) -> CognitionTask:
         return CognitionTask(
@@ -105,7 +112,6 @@ class Cognition:
 
     @crew
     def crew(self) -> CognitionCrew:
-        """Creates the Cognition crew with tool integration"""
         return CognitionCrew(
             agents=self.agents,
             tasks=self.tasks,
