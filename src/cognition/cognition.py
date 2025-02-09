@@ -7,10 +7,11 @@ from cognition_core.crew import CognitionCrew
 from crewai.project import agent, crew, task
 from typing import Dict, List
 from crewai import Process
+from cognition_core.base import ComponentManager
 
 
 @CognitionCoreCrewBase
-class Cognition:
+class Cognition(ComponentManager):
     """Base Cognition implementation - Virtual Interface"""
 
     def __init__(self):
@@ -26,8 +27,9 @@ class Cognition:
             # No running loop - update components immediately
             self._update_components()
 
+    # Now these methods implement the abstract interface
     def _update_components(self) -> None:
-        """Safely update available components after initialization"""
+        """Implements ComponentManager.update_components"""
         agents = getattr(self, "agents", [])
         tasks = getattr(self, "tasks", [])
         self.available_components = {
@@ -36,7 +38,7 @@ class Cognition:
         }
 
     def activate_component(self, component_type: str, name: str) -> bool:
-        """Activate a specific component"""
+        """Implements ComponentManager.activate_component"""
         if component_type in self.available_components:
             for component in self.available_components[component_type]:
                 if component.name == name:
@@ -45,7 +47,7 @@ class Cognition:
         return False
 
     def deactivate_component(self, component_type: str, name: str) -> bool:
-        """Deactivate a specific component"""
+        """Implements ComponentManager.deactivate_component"""
         if component_type in self.available_components:
             for component in self.available_components[component_type]:
                 if component.name == name:
@@ -53,8 +55,8 @@ class Cognition:
                     return True
         return False
 
-    def get_active_workflow(self) -> Dict[str, List[str]]:
-        """Get currently active workflow components"""
+    def get_active_workflow(self) -> dict:
+        """Implements ComponentManager.get_active_workflow"""
         return {
             "agents": [a.name for a in self.available_components["agents"]],
             "tasks": [t.name for t in self.available_components["tasks"]],
