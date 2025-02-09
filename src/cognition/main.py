@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from cognition.crew import Cognition
+# from cognition_core.logger import logger
+from cognition import Cognition
 from datetime import datetime
 import warnings
 import sys
@@ -18,11 +19,7 @@ def run():
     inputs = {"topic": "AI LLMs", "current_year": str(datetime.now().year)}
 
     try:
-        cognition = Cognition()
-        crew = cognition.crew()
-
-        # Use kickoff (not kickoff_async) as it handles the async internally
-        result = crew.kickoff(inputs=inputs)
+        result = Cognition().kickoff(inputs=inputs)
         return result
 
     except Exception as e:

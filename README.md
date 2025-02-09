@@ -2,215 +2,177 @@
 
 ![Cognition AI](./designs/cognition-ai.jpg)
 
-A modular, production-ready framework for building and deploying CrewAI agents with standardized patterns, dynamic tooling, and enterprise-grade features.
+A production-ready virtual interface for building and deploying intelligent agents, powered by CrewAI and enhanced with enterprise-grade features through Cognition Core.
 
-## Project Overview
+## Overview
 
-Cognition is designed to solve common challenges in agent development by providing a structured, maintainable approach to building AI agents. It prevents the "agent graveyard" problem where one-off agents become unmaintainable and helps organizations standardize their agent development practices.
+Cognition serves as an intelligent virtual interface for task orchestration and agent management. It prevents the "agent graveyard" problem by providing:
 
-### Core Modules
-
-#### 1. Cognition Core
-The foundation layer that extends CrewAI with enterprise features:
-- Configuration management with hot-reload capability
-- Flexible memory systems (Redis, Firestore)
-- Dynamic tool loading and management
-- Standardized patterns for agent development
-- Environment-aware deployment configurations
-
-#### 2. Cognition API
-REST and OpenAI-compatible interface layer:
-- Standard REST endpoints for agent interaction
-- OpenAI-compatible endpoints for easy integration
-- Async task processing
-- Built-in monitoring and security
-- Production-ready deployment options
-
-### Key Benefits
-
-1. **Standardization**
-   - Consistent patterns for agent development
+1. **Standardized Agent Development**
+   - Consistent patterns through Cognition Core
+   - Reusable tool ecosystems
    - Unified configuration management
-   - Structured tool integration
 
-2. **Maintainability**
-   - Hot-reload configurations
-   - Clear separation of concerns
-   - Modular architecture
+2. **Intelligent Task Management**
+   - Hierarchical task planning with manager agents
+   - Dynamic tool allocation
+   - Context-aware execution
 
-3. **Scalability**
-   - Cloud-native design
-   - Independent component scaling
-   - Production-ready infrastructure
+3. **Enterprise Integration**
+   - Cloud-native deployment options
+   - Scalable memory systems
+   - Production monitoring
 
-4. **Reusability**
-   - Shared tool ecosystem
-   - Common memory patterns
-   - Standardized deployment practices
+4. **Virtual Interface**
+   - Natural language task submission
+   - Execution feedback and monitoring
+   - Context-aware responses
 
-## Entry Layer
+## Architecture
 
-The architecture begins with an entry point that routes all requests through Portkey, which serves as our LLM management layer. This design choice provides several advantages:
+### Core Components
 
-The Portkey integration allows for sophisticated LLM routing and management, ensuring that requests are directed to the most appropriate model based on complexity and requirements. This layer acts as our first line of defense and optimization point for all AI interactions.
+#### 1. Virtual Interface Layer
+- **Manager Agent**: Orchestrates task planning and execution
+- **Chat LLM**: Handles natural language interactions
+- **Cognitive Architecture**: Processes tasks and provides intelligent feedback
 
-## Core Agent Container (Cloud Run)
+#### 2. Task Management
+- **Task Planning**: Dynamic task breakdown and allocation
+- **Context Management**: Maintains execution context
+- **Tool Selection**: Intelligent tool assignment
 
-The main agent runs in a Cloud Run container, which provides excellent scalability and managed infrastructure. Within this container, we have several key components:
+#### 3. Memory Systems
+- **Short-term**: Quick access to recent context
+- **Long-term**: Persistent knowledge storage
+- **Entity Memory**: Relationship tracking
 
-### Configuration System
-The configuration system consists of three main parts:
-1. YAML Loader - Reads configuration files
-2. Hot Reload - Monitors for configuration changes
-3. Environment Manager - Handles environment variables and settings
+#### 4. Tool Integration
+- **Dynamic Loading**: Auto-discovery of available tools
+- **Version Management**: Tool compatibility tracking
+- **Response Validation**: Quality assurance
 
-This system allows for dynamic updates to the agent's behavior without requiring redeployment, which is crucial for maintaining flexibility in production.
+## Usage Patterns
 
-### Core Crew
-The heart of our agent contains three essential components:
-1. Planner Agent - Handles high-level task planning
-2. Task Router - Directs tasks to appropriate handlers
-3. Executor Agent - Manages task execution
+### 1. Container Deployment
+```python
+from cognition import Cognition
 
-This structure leverages CrewAI's native capabilities while adding our own orchestration layer for better control and monitoring.
+# Initialize with default settings
+cognition = Cognition()
 
-### Memory System
-The memory system is designed with flexibility in mind:
-1. Local Cache - Fast, in-memory storage
-2. Short Term (Redis) - Distributed cache for scalability
-3. Long Term (Firestore) - Persistent storage for important data
+# Start API server
+app = cognition.api
+```
 
-The system can switch between local and cloud storage based on deployment needs, providing both development simplicity and production scalability.
+### 2. Package Integration
+```python
+from cognition import Cognition
 
-### Tool System
-The tool system is designed for extensibility:
-1. Tool Registry - Manages available tools
-2. API Tool Wrapper - Standardizes tool interfaces
-3. Response Validator - Ensures tool output quality
+# Custom configuration
+cognition = Cognition(
+    config_dir="path/to/config",
+    memory_enabled=True,
+    tool_discovery=True
+)
 
-All tools are implemented as external APIs (Cloud Functions), allowing for independent scaling and maintenance.
+# Create custom agent
+agent = cognition.create_agent(
+    role="researcher",
+    tools=["web_search", "document_reader"]
+)
+```
 
-## External Integration
+## Configuration
 
-### External APIs (Cloud Functions)
-Tools are implemented as Cloud Functions, including:
-- GSuite integration
-- Trading functionality
-- Finance operations
+### Agent Configuration (agents.yaml)
+```yaml
+researcher:
+  role: "Research Specialist"
+  goal: "Gather and analyze information"
+  backstory: "Experienced research analyst with expertise in data analysis"
+  llm: "gpt-4"
+  tools:
+    - web_search
+    - document_reader
+    - data_analyzer
 
-This approach allows each tool to:
-- Scale independently
-- Be maintained separately
-- Be versioned individually
-- Have its own resource allocation
+manager:
+  role: "Task Coordinator"
+  goal: "Orchestrate and optimize task execution"
+  llm: "gpt-4"
+  verbose: true
+```
 
-### Persistence Layer
-The persistence layer includes:
-1. Redis - For distributed caching
-2. Firestore - For long-term storage
-3. Secret Manager - For secure credential storage
+### Task Configuration (tasks.yaml)
+```yaml
+research_task:
+  description: "Conduct comprehensive research on {topic}"
+  expected_output: "Detailed analysis report"
+  tools:
+    - web_search
+    - document_reader
+  context_required: true
+```
 
-## Key Design Decisions
+## Enterprise Features
 
-### Simplicity
-1. Minimal custom code
-2. Heavy reliance on CrewAI's native features
-3. Clear separation of concerns
+### 1. Scalability
+- Horizontal scaling through containerization
+- Independent tool scaling
+- Distributed memory systems
 
-### Scalability
-1. Cloud-native design
-2. Independently scalable components
-3. Flexible memory configuration
+### 2. Monitoring
+- Task execution metrics
+- Agent performance tracking
+- Resource utilization
 
-### Maintainability
-1. Hot reload for configurations
-2. External tools as APIs
-3. Clear component boundaries
-
-## Implementation Notes
-
-### CrewAI Integration
-The design leverages CrewAI's built-in features:
-1. Memory management
-2. Task planning
-3. Tool integration
-4. Error handling
-
-### Tool Management
-Tools are managed through:
-1. External API endpoints
-2. Standard interface definitions
-3. Central registry
-4. Response validation
-
-### Configuration Management
-Configurations are handled through:
-1. YAML files for readability
-2. Hot reload for updates
-3. Environment variables for secrets
-
-## Future Considerations
-
-### Planned Improvements
-1. Webhook endpoints for tool status updates
-2. Enhanced monitoring capabilities
-3. Expanded tool ecosystem
-
-### Scaling Strategy
-The architecture can scale in several ways:
-1. Horizontal scaling of Cloud Run instances
-2. Independent scaling of tool functions
-3. Distributed memory system when needed
+### 3. Security
+- Role-based access control
+- Tool usage policies
+- Audit logging
 
 ## Development Workflow
 
-The architecture supports a clean development workflow:
-1. Local development with local storage
-2. Testing with cloud resources
-3. Production deployment with full cloud integration
-
-## Docker Image Creation
-
-To build and run the Docker image for the Cognition API, follow these steps:
-
-1. **Build the Docker Image**:
+1. **Local Development**
    ```bash
-   docker build -t cognition .
+   # Install dependencies
+   pip install cognition-ai[dev]
+
+   # Run tests
+   pytest tests/
+
+   # Start local server
+   cognition serve
    ```
 
-2. **Run the Docker Container**:
+2. **Container Deployment**
    ```bash
+   # Build container
+   docker build -t cognition .
+
+   # Run container
    docker run -p 8000:8000 cognition
    ```
 
-This will start the Cognition API on port 8000.
-
 ## Environment Variables
 
-The following environment variables can be configured for the Cognition API. They are optional, except for `PORTKEY_API_KEY` and `PORTKEY_VIRTUAL_KEY`, which are required:
+Required:
+- `PORTKEY_API_KEY`: Portkey API key
+- `PORTKEY_VIRTUAL_KEY`: Portkey virtual key
 
-- `ANTHROPIC_API_KEY`: Optional API key for Anthropic services.
-- `HUGGINGFACE_API_TOKEN`: Optional token for Hugging Face services.
-- `PORTKEY_API_KEY`: **Required** API key for Portkey integration.
-- `PORTKEY_VIRTUAL_KEY`: Optional virtual key for Portkey.
-- `LONG_TERM_DB_PASSWORD`: Optional password for long-term database access.
-- `APP_LOG_LEVEL`: Optional log level for the application (default: DEBUG).
-- `CHROMA_PASSWORD`: Optional password for Chroma services.
-- `COGNITION_CONFIG_DIR`: Optional path to the Cognition configuration directory.
+Optional:
+- `COGNITION_CONFIG_DIR`: Configuration directory
+- `MEMORY_ENABLED`: Enable memory systems
+- `TOOL_DISCOVERY`: Enable tool discovery
+- `LOG_LEVEL`: Logging level
 
-These variables can be set in the Docker container using the `-e` flag or in a `.env` file if needed.
+## Contributing
 
-## API Enhancements
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request with tests
 
-The Cognition API now supports asynchronous task processing, allowing for non-blocking operations and improved scalability. Key features include:
+## License
 
-- **Asynchronous Task Execution**: Tasks are processed in the background, enabling immediate API responses.
-- **Task Status Tracking**: Check the status of tasks using the `/status/{task_id}` endpoint.
-- **Integration with AWS SQS**: Optionally send task results to an external queue for persistence and further processing.
-
-## Docker Hub
-
-The Docker image for the Cognition API is available on Docker Hub. You can pull the latest image using:
-   ```bash
-   docker pull nestorcolt/cognition:latest
-   ```
+MIT
