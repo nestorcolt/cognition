@@ -1,13 +1,12 @@
-import asyncio
 from cognition_core.crew import CognitionCoreCrewBase
+from cognition_core.base import ComponentManager
 from cognition_core.llm import init_portkey_llm
 from cognition_core.agent import CognitionAgent
 from cognition_core.task import CognitionTask
 from cognition_core.crew import CognitionCrew
 from crewai.project import agent, crew, task
-from typing import Dict, List
 from crewai import Process
-from cognition_core.base import ComponentManager
+import asyncio
 
 
 @CognitionCoreCrewBase
@@ -100,16 +99,26 @@ class Cognition(ComponentManager):
     # Task definitions
     @task
     def research_task(self) -> CognitionTask:
+        # Extract task name from config
+        task_config = self.tasks_config["research_task"]
+        task_name = task_config.get("name", "research_task")
+
         return CognitionTask(
-            config=self.tasks_config["research_task"],
+            name=task_name,  # Pass name from config
+            config=task_config,
             tool_names=self.list_tools(),
             tool_service=self.tool_service,
         )
 
     @task
     def reporting_task(self) -> CognitionTask:
+        # Extract task name from config
+        task_config = self.tasks_config["reporting_task"]
+        task_name = task_config.get("name", "reporting_task")
+
         return CognitionTask(
-            config=self.tasks_config["reporting_task"], output_file="report.md"
+            name=task_name,  # Pass name from config
+            config=task_config,
         )
 
     @crew
