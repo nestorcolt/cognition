@@ -119,7 +119,7 @@ class Cognition(ComponentManager):
 
         manager = self.manager()
         agents = [itm for itm in self.agents if itm != manager]
-
+        # TODO: pass yaml config to crew with my memory service
         return CognitionCrew(
             agents=agents,
             tasks=self.tasks,
@@ -132,5 +132,4 @@ class Cognition(ComponentManager):
             short_term_memory=self.memory_service.get_short_term_memory(),
             entity_memory=self.memory_service.get_entity_memory(),
             long_term_memory=self.memory_service.get_long_term_memory(),
-
         )
