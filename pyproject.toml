@@ -9,7 +9,6 @@ dependencies = [
     "langchain-community>=0.0.27",
     "chromadb>=0.4.0",
     "cognition-core==0.3.0",
-    "cognition-api==0.2.1",
 ]
 
 [project.optional-dependencies]
