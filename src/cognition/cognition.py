@@ -18,6 +18,7 @@ class Cognition(ComponentManager):
         self.available_components = {"agents": [], "tasks": []}
         # Call parent so CrewBase processes @agent/@task decorators
         super().__init__()
+
         # Try deferring the update until an event loop is available
         try:
             loop = asyncio.get_running_loop()
@@ -61,77 +62,75 @@ class Cognition(ComponentManager):
             "tasks": [t.name for t in self.available_components["tasks"]],
         }
 
-    # Public kickoff method: delegate to the crew's public kickoff method
-    def kickoff(self, inputs=None):
-        """Kick off the crew execution using the crew's kickoff method."""
-        crew_obj = self.crew()  # Get the crew
-        return crew_obj.kickoff(inputs)  # Use the public 'kickoff' method
-
-    # Agent definitions
     @agent
     def manager(self) -> CognitionAgent:
+        """Strategic manager agent"""
         llm = init_portkey_llm(
             model=self.agents_config["manager"]["llm"],
             portkey_config=self.portkey_config,
         )
-        return self.get_cognition_agent(config=self.agents_config["manager"], llm=llm)
-
-    @agent
-    def researcher(self) -> CognitionAgent:
-        llm = init_portkey_llm(
-            model=self.agents_config["researcher"]["llm"],
-            portkey_config=self.portkey_config,
-        )
         return self.get_cognition_agent(
-            config=self.agents_config["researcher"], llm=llm
+            config=self.agents_config["manager"], llm=llm, allow_delegation=True
         )
 
     @agent
-    def reporting_analyst(self) -> CognitionAgent:
+    def analyzer(self) -> CognitionAgent:
+        """Analysis specialist agent"""
         llm = init_portkey_llm(
-            model=self.agents_config["reporting_analyst"]["llm"],
+            model=self.agents_config["analyzer"]["llm"],
             portkey_config=self.portkey_config,
         )
-        return self.get_cognition_agent(
-            config=self.agents_config["reporting_analyst"], llm=llm
-        )
+        return self.get_cognition_agent(config=self.agents_config["analyzer"], llm=llm)
 
-    # Task definitions
+    @agent
+    def executor(self) -> CognitionAgent:
+        """Execution specialist agent"""
+        llm = init_portkey_llm(
+            model=self.agents_config["executor"]["llm"],
+            portkey_config=self.portkey_config,
+        )
+        # Executor gets access to all tools
+        return self.get_cognition_agent(config=self.agents_config["executor"], llm=llm)
+
     @task
-    def research_task(self) -> CognitionTask:
-        # Extract task name from config
-        task_config = self.tasks_config["research_task"]
-        task_name = task_config.get("name", "research_task")
-
+    def analysis_task(self) -> CognitionTask:
+        """Input analysis task"""
+        task_config = self.tasks_config["analysis_task"]
         return CognitionTask(
-            name=task_name,  # Pass name from config
+            name="analysis_task",
             config=task_config,
             tool_names=self.list_tools(),
             tool_service=self.tool_service,
         )
 
     @task
-    def reporting_task(self) -> CognitionTask:
-        # Extract task name from config
-        task_config = self.tasks_config["reporting_task"]
-        task_name = task_config.get("name", "reporting_task")
-
+    def execution_task(self) -> CognitionTask:
+        """Action execution task"""
+        task_config = self.tasks_config["execution_task"]
         return CognitionTask(
-            name=task_name,  # Pass name from config
+            name="execution_task",
             config=task_config,
+            tool_names=self.list_tools(),
+            tool_service=self.tool_service,
         )
 
     @crew
     def crew(self) -> CognitionCrew:
+
+        manager = self.manager()
+        agents = [itm for itm in self.agents if itm != manager]
+
         return CognitionCrew(
-            agents=self.agents,
+            agents=agents,
             tasks=self.tasks,
-            process=Process.sequential,
+            manager_agent=manager,
+            process=Process.hierarchical,
             memory=True,
             verbose=True,
+            embedder=self.memory_service.embedder,
             tool_service=self.tool_service,
             short_term_memory=self.memory_service.get_short_term_memory(),
             entity_memory=self.memory_service.get_entity_memory(),
             long_term_memory=self.memory_service.get_long_term_memory(),
-            embedder=self.memory_service.embedder,
+
         )

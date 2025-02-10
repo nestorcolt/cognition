@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# from cognition_core.logger import logger
 from cognition import Cognition
-from datetime import datetime
+from numpy import intp
 import warnings
 import sys
 
@@ -15,11 +14,9 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
 
 def run():
-    """Run the crew."""
-    inputs = {"topic": "AI LLMs", "current_year": str(datetime.now().year)}
 
     try:
-        result = Cognition().kickoff(inputs=inputs)
+        result = Cognition().crew().kickoff()
         return result
 
     except Exception as e:
