@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 def run():
 
     try:
-        result = Cognition().crew().kickoff(inputs={"message": "Quatum Mechanics"})
+        result = Cognition().crew().kickoff()
         return result
 
     except Exception as e:
