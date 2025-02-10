@@ -2,6 +2,7 @@
 from cognition import Cognition
 from numpy import intp
 import warnings
+import asyncio
 import sys
 
 
@@ -16,7 +17,7 @@ warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 def run():
 
     try:
-        result = Cognition().crew().kickoff()
+        result = asyncio.run(Cognition().crew().kickoff_async())
         return result
 
     except Exception as e:
