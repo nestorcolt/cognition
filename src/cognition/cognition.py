@@ -82,15 +82,6 @@ class Cognition(ComponentManager):
         )
         return self.get_cognition_agent(config=self.agents_config["analyzer"], llm=llm)
 
-    @agent
-    def executor(self) -> CognitionAgent:
-        """Execution specialist agent"""
-        llm = init_portkey_llm(
-            model=self.agents_config["executor"]["llm"],
-            portkey_config=self.portkey_config,
-        )
-        # Executor gets access to all tools
-        return self.get_cognition_agent(config=self.agents_config["executor"], llm=llm)
 
     @task
     def analysis_task(self) -> CognitionTask:
@@ -98,17 +89,6 @@ class Cognition(ComponentManager):
         task_config = self.tasks_config["analysis_task"]
         return CognitionTask(
             name="analysis_task",
-            config=task_config,
-            tool_names=self.list_tools(),
-            tool_service=self.tool_service,
-        )
-
-    @task
-    def execution_task(self) -> CognitionTask:
-        """Action execution task"""
-        task_config = self.tasks_config["execution_task"]
-        return CognitionTask(
-            name="execution_task",
             config=task_config,
             tool_names=self.list_tools(),
             tool_service=self.tool_service,
