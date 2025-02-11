@@ -132,4 +132,5 @@ class Cognition(ComponentManager):
             short_term_memory=self.memory_service.get_short_term_memory(),
             entity_memory=self.memory_service.get_entity_memory(),
             long_term_memory=self.memory_service.get_long_term_memory(),
+            chat_llm="claude-3-5-haiku-20241022"
         )
