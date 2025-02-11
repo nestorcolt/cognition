@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from cognition import Cognition
-from numpy import intp
 import warnings
 import asyncio
 import sys
