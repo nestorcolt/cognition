@@ -7,6 +7,8 @@ from cognition_core.crew import CognitionCrew
 from crewai.project import agent, crew, task
 from crewai import Process
 import asyncio
+from fastapi import FastAPI, Request
+from cognition.api import CoreAPIService
 
 
 @CognitionCoreCrewBase
@@ -14,6 +16,11 @@ class Cognition(ComponentManager):
     """Base Cognition implementation - Virtual Interface"""
 
     def __init__(self):
+        # Initialize FastAPI
+        self.api = CoreAPIService()
+        self.app = self.api.get_app()
+        self._setup_routes()
+
         # Initialize empty components first
         self.available_components = {"agents": [], "tasks": []}
         # Call parent so CrewBase processes @agent/@task decorators
@@ -26,6 +33,24 @@ class Cognition(ComponentManager):
         except RuntimeError:
             # No running loop - update components immediately
             self._update_components()
+
+    def _setup_routes(self):
+        """Setup additional API routes"""
+
+        @self.app.post("/chat")
+        async def chat_endpoint(request: Request):
+            message = await request.json()
+            input_text = message.get("input", "")
+
+            result = await asyncio.get_event_loop().run_in_executor(
+                self.api.executor, lambda: self.chat(input_text)
+            )
+
+            return {"response": result}
+
+    def get_app(self) -> FastAPI:
+        """Get the FastAPI application instance"""
+        return self.app
 
     # Now these methods implement the abstract interface
     def _update_components(self) -> None:
@@ -82,7 +107,6 @@ class Cognition(ComponentManager):
         )
         return self.get_cognition_agent(config=self.agents_config["analyzer"], llm=llm)
 
-
     @task
     def analysis_task(self) -> CognitionTask:
         """Input analysis task"""
@@ -112,5 +136,12 @@ class Cognition(ComponentManager):
             short_term_memory=self.memory_service.get_short_term_memory(),
             entity_memory=self.memory_service.get_entity_memory(),
             long_term_memory=self.memory_service.get_long_term_memory(),
-            chat_llm="claude-3-5-haiku-20241022"
+            chat_llm="claude-3-5-haiku-20241022",
         )
+
+
+###############################################################################################
+
+
+def chat(self, input: str):
+    return self.cognition().crew().kickoff(input)
