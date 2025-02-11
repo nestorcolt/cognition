@@ -24,4 +24,4 @@ ENV CHROMA_PASSWORD=""
 EXPOSE 8000
 
 # Command to run when starting the container
-CMD ["uvicorn", "cognition.cognition:Cognition().get_app()", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "cognition.cognition"]

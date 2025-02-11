@@ -5,10 +5,10 @@ from cognition_core.agent import CognitionAgent
 from cognition_core.task import CognitionTask
 from cognition_core.crew import CognitionCrew
 from crewai.project import agent, crew, task
+from cognition_core.api import CoreAPIService
+from fastapi import FastAPI, Request
 from crewai import Process
 import asyncio
-from fastapi import FastAPI, Request
-from cognition.api import CoreAPIService
 
 
 @CognitionCoreCrewBase
@@ -39,8 +39,8 @@ class Cognition(ComponentManager):
 
         @self.app.post("/chat")
         async def chat_endpoint(request: Request):
-            message = await request.json()
-            input_text = message.get("input", "")
+            data = await request.json()
+            input_text = data.get("message", "")
 
             result = await asyncio.get_event_loop().run_in_executor(
                 self.api.executor, lambda: self.chat(input_text)
@@ -139,9 +139,25 @@ class Cognition(ComponentManager):
             chat_llm="claude-3-5-haiku-20241022",
         )
 
+    def chat(self, input_text: str):
+        """Process message input through the crew"""
+        print(f"Chat input: {input_text}")
+        return self.crew().kickoff(inputs={"message": input_text})
+
 
 ###############################################################################################
+# Run as API chat interface
 
 
-def chat(self, input: str):
-    return self.cognition().crew().kickoff(input)
+def run_api():
+    import uvicorn
+
+    cognition = Cognition()
+    app = cognition.get_app()
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+if __name__ == "__main__":
+    run_api()
+
+###############################################################################################
