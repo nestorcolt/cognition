@@ -1,5 +1,5 @@
 [project]
-name = "cognition-ai"
+name = "cognition"
 dynamic = ["version"]
 description = "Wrapper agent for crewai - Enables dynamic tooling, configuration, and more"
 authors = [{ name = "Nestor Colt", email = "nestor.colt@gmail.com" }]
