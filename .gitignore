@@ -114,3 +114,4 @@ report.md
 *.drawio.bkp
 *cognition-ai.drawio.bkp*
 *.bkp
+.env*
