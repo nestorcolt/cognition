@@ -1,4 +1,3 @@
-from cognition_core.flow import CognitionFlow, CodeReviewFlow
 from cognition_core.crew import CognitionCoreCrewBase
 from cognition_core.base import ComponentManager
 from cognition_core.llm import init_portkey_llm
@@ -62,7 +61,7 @@ class Cognition(ComponentManager):
         self.available_components = {
             "agents": [a for a in agents if a.is_available],
             "tasks": [t for t in tasks if t.is_available],
-            "flows": [f for f in flows if f.is_available]
+            "flows": [f for f in flows if f.is_available],
         }
 
     def activate_component(self, component_type: str, name: str) -> bool:
@@ -147,12 +146,12 @@ class Cognition(ComponentManager):
         print(f"Chat input: {input_text}")
         return self.crew().kickoff(inputs={"message": input_text})
 
-    @flow
-    def code_review_flow(self) -> CognitionFlow:
-        """Code review automation flow"""
-        return CodeReviewFlow.from_config(
-            self.flows_config["code_review"]
-        )
+    # @flow
+    # def code_review_flow(self) -> CognitionFlow:
+    #     """Code review automation flow"""
+    #     return CodeReviewFlow.from_config(
+    #         self.flows_config["code_review"]
+    #     )
 
 
 ###############################################################################################
