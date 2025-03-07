@@ -3,6 +3,12 @@ FROM python:3.12-slim
 # Set the working directory
 WORKDIR /app
 
+# Install git and build dependencies
+RUN apt-get update && \
+    apt-get install -y git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy the package files
 COPY . .
 

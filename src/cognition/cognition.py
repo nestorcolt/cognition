@@ -22,7 +22,7 @@ class Cognition(ComponentManager):
         self._setup_routes()
 
         # Initialize empty components first
-        self.available_components = {"agents": [], "tasks": []}
+        self.available_components = {"agents": [], "tasks": [], "flows": []}
         # Call parent so CrewBase processes @agent/@task decorators
         super().__init__()
 
@@ -57,9 +57,11 @@ class Cognition(ComponentManager):
         """Implements ComponentManager.update_components"""
         agents = getattr(self, "agents", [])
         tasks = getattr(self, "tasks", [])
+        flows = getattr(self, "flows", [])
         self.available_components = {
             "agents": [a for a in agents if a.is_available],
             "tasks": [t for t in tasks if t.is_available],
+            "flows": [f for f in flows if f.is_available],
         }
 
     def activate_component(self, component_type: str, name: str) -> bool:
@@ -143,6 +145,13 @@ class Cognition(ComponentManager):
         """Process message input through the crew"""
         print(f"Chat input: {input_text}")
         return self.crew().kickoff(inputs={"message": input_text})
+
+    # @flow
+    # def code_review_flow(self) -> CognitionFlow:
+    #     """Code review automation flow"""
+    #     return CodeReviewFlow.from_config(
+    #         self.flows_config["code_review"]
+    #     )
 
 
 ###############################################################################################

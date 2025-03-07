@@ -8,7 +8,7 @@ dependencies = [
     "crewai[tools]>=0.100.1,<1.0.0",
     "langchain-community>=0.0.27",
     "chromadb>=0.4.0",
-    "cognition-core==0.3.0",
+    "cognition-core",
 ]
 
 [project.optional-dependencies]
@@ -40,3 +40,11 @@ packages = ["src/cognition"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
