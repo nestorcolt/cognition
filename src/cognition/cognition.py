@@ -46,11 +46,10 @@ class Cognition:
         return CognitionCrew(
             agents=agents,
             tasks=self.tasks,
-            memory=False,
             # manager_agent=manager,
             # process=Process.hierarchical,
             # memory=True,
-            # verbose=True,
+            verbose=True,
             # embedder=self.memory_service.embedder,
             # tool_service=self.tool_service,
             # short_term_memory=self.memory_service.get_short_term_memory(),
